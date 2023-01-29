@@ -1,6 +1,7 @@
 #ifndef __TOKEN_H_
 #define __TOKEN_H_
 
+
 enum TokenType {
     TOKEN_WORD,
     TOKEN_STR,

@@ -1,6 +1,7 @@
 #include "token.h"
 #include <assert.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 
 const char *get_str_from_token(enum TokenType type)
@@ -25,6 +26,11 @@ struct Token *create_token(enum TokenType type, const char *value)
 {
     struct Token *token = malloc(sizeof(struct Token));
 
+    if (token == NULL) {
+	fprintf(stderr, "error: compiler could not allocate enough memory, %lu bytes were requested\n", sizeof(struct Token));
+	exit(1);
+    }
+    
     token->type = type;
     token->value = value;
 
