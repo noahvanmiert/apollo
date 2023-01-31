@@ -1,3 +1,9 @@
+/*
+ *	Made by Noah Van Miert
+ *	27/01/2023
+*/
+
+
 #include <stdio.h>
 #include "lexer/lexer.h"
 

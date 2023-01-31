@@ -1,18 +1,26 @@
+/*
+ *	Made by Noah Van Miert
+ *	31/01/2023
+*/
+
+
 #include "lexer.h"
+
+#include <assert.h>
 #include <ctype.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 
-static void advance(struct Lexer *lexer)
+static inline void advance(struct Lexer *lexer)
 {
 	lexer->index++;
 	lexer->current = lexer->data[lexer->index];
 }
 
 
-static void skip_white(struct Lexer *lexer)
+static inline void skip_white(struct Lexer *lexer)
 {
 	while (isspace(lexer->current))
 		advance(lexer);
@@ -39,6 +47,9 @@ static struct Token *parse_special(struct Lexer *lexer)
 static struct Token *parse_word(struct Lexer *lexer)
 {
 	char *word = calloc(1, sizeof(char));
+
+	if (word == NULL)
+		assert(0 && "error: apollo compiler could not allocate enough memory");
 
 	while (isalpha(lexer->current)) {
 		word = realloc(word, (strlen(word) + 2) * sizeof(char));

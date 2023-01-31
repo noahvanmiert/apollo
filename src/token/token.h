@@ -1,3 +1,9 @@
+/*
+ *	Made by Noah Van Miert
+ *	27/01/23
+*/
+
+
 #ifndef __TOKEN_H_
 #define __TOKEN_H_
 
@@ -24,5 +30,6 @@ struct Token {
 
 const char *get_token_str(enum TokenType type);
 struct Token *create_token(enum TokenType type, const char *value);
+
 
 #endif // __TOKEN_H_

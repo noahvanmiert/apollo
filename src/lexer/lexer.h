@@ -1,10 +1,15 @@
+/*
+ *	Made by Noah Van Miert
+ *	31/01/2023
+*/
+
+
 #ifndef __LEXER_H_
 #define __LEXER_H_
 
-#include <stddef.h>
 
 #include "../token/token.h"
-
+#include <stddef.h>
 
 struct Lexer {
 	const char *data;
