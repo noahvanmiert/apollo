@@ -1,13 +1,20 @@
 #include <stdio.h>
-#include "token/token.h"
+#include "lexer/lexer.h"
 
 
 int main(void)
 {
-    struct Token *token = create_token(TOKEN_WORD, "fn");
+	struct Lexer lexer;
 
-    printf("token: '%s'\n", token->value);
-    printf("token type: '%s'\n", get_str_from_token(token->type));
+	lexer.data = "fn main() {}";
+	lexer.index = 0;
+	lexer.current = lexer.data[0];
+
+	struct Token *tok;
+
+	while ((tok = lexer_get_token(&lexer))) {
+		printf("token: '%s' type: '%s'\n", tok->value, get_token_str(tok->type));
+	}
 
     return 0;
 }
