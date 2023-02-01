@@ -12,7 +12,7 @@ int main(void)
 {
 	struct Lexer lexer;
 
-	lexer.data = "fn main() {}";
+	lexer.data = "fn main() { print(1); }";
 	lexer.index = 0;
 	lexer.current = lexer.data[0];
 

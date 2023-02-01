@@ -61,6 +61,20 @@ static struct Token *parse_word(struct Lexer *lexer)
 }
 
 
+static struct Token *parse_number(struct Lexer *lexer)
+{
+	char *number = calloc(1, sizeof(char));
+	
+	while (isalnum(lexer->current)) {
+		number = realloc(number, (strlen(number) + 2) * sizeof(char));
+		strcat(number, (char []) {lexer->current, '\0'});
+		advance(lexer);
+	}
+
+	return create_token(TOKEN_INT, number);
+}
+
+
 struct Token *lexer_get_token(struct Lexer *lexer)
 {
 	if (lexer->current != '\0') {
@@ -68,6 +82,9 @@ struct Token *lexer_get_token(struct Lexer *lexer)
 
 		if (isalpha(lexer->current))
 			return parse_word(lexer);
+
+		if (isalnum(lexer->current))
+			return parse_number(lexer);
 
 		return parse_special(lexer);
 	}
