@@ -65,6 +65,9 @@ static struct Token *parse_number(struct Lexer *lexer)
 {
 	char *number = calloc(1, sizeof(char));
 	
+	if (number == NULL)
+		assert(0 && "error: apollo compiler could not allocate enough memory");
+
 	while (isalnum(lexer->current)) {
 		number = realloc(number, (strlen(number) + 2) * sizeof(char));
 		strcat(number, (char []) {lexer->current, '\0'});
