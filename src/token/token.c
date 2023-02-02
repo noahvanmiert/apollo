@@ -31,9 +31,8 @@ const char *get_token_str(enum TokenType type)
 struct Token *create_token(enum TokenType type, const char *value)
 {
     struct Token *token = malloc(sizeof(struct Token));
-
-    if (token == NULL)
-		assert("error: compiler could not allocate enough memory");
+    
+	assert(token && "error: compiler could not allocate enough memory");
     
     token->type = type;
     token->value = value;

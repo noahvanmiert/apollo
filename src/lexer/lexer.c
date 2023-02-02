@@ -48,16 +48,45 @@ static struct Token *parse_word(struct Lexer *lexer)
 {
 	char *word = calloc(1, sizeof(char));
 
-	if (word == NULL)
-		assert(0 && "error: apollo compiler could not allocate enough memory");
+	assert(word && "error: apollo compiler could not allocate enough memory");
+
 
 	while (isalpha(lexer->current)) {
 		word = realloc(word, (strlen(word) + 2) * sizeof(char));
+
+		/* Add the current character to the word */
 		strcat(word, (char []) {lexer->current, '\0'});
 		advance(lexer);
 	}
 
+
 	return create_token(TOKEN_WORD, word);
+}
+
+
+static struct Token *parse_str(struct Lexer *lexer)
+{
+	char *str = calloc(1, sizeof(char));
+
+	assert(str && "error: apollo compiler could not allocate enough memory");
+
+	/* To jump over the first '"' */
+	advance(lexer);
+
+
+	while (lexer->current != '"') {
+		str = realloc(str, (strlen(str) + 2) * sizeof(char));
+
+		/* Add the current character to the string literal */
+		strcat(str, (char []) {lexer->current, '\0'});
+		advance(lexer);
+	}
+
+
+	/* To jump over the last '"' */
+	advance(lexer);
+
+	return create_token(TOKEN_STR, str);
 }
 
 
@@ -65,14 +94,17 @@ static struct Token *parse_number(struct Lexer *lexer)
 {
 	char *number = calloc(1, sizeof(char));
 	
-	if (number == NULL)
-		assert(0 && "error: apollo compiler could not allocate enough memory");
+	assert(number && "error: apollo compiler could not allocate enough memory");
+
 
 	while (isalnum(lexer->current)) {
 		number = realloc(number, (strlen(number) + 2) * sizeof(char));
+
+		/* Add the current character to the number literal */
 		strcat(number, (char []) {lexer->current, '\0'});
 		advance(lexer);
 	}
+
 
 	return create_token(TOKEN_INT, number);
 }
@@ -82,13 +114,23 @@ struct Token *lexer_get_token(struct Lexer *lexer)
 {
 	if (lexer->current != '\0') {
 		skip_white(lexer);
-
+	
+		/* Parse a full word */
 		if (isalpha(lexer->current))
 			return parse_word(lexer);
 
+
+		/* Parse a number literal */
 		if (isalnum(lexer->current))
 			return parse_number(lexer);
 
+
+		/* Parse a string literal */
+		if (lexer->current == '"')
+			return parse_str(lexer);
+
+
+		/* Parse a char like '{', '}', ... */
 		return parse_special(lexer);
 	}
 
