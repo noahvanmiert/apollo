@@ -12,14 +12,12 @@ int main(void)
 {
 	struct Lexer lexer;
 
-	lexer.data = "void main() { write(\"Hello, World!\"); }";
-	lexer.index = 0;
-	lexer.current = lexer.data[0];
+	lexer_init(&lexer, "examples/write.apo");
 
 	struct Token *tok;
 
 	while ((tok = lexer_get_token(&lexer))) {
-		printf("token: '%s' type: '%s'\n", tok->value, get_token_str(tok->type));
+		printf("%s:%zu:%zu: '%s' type: '%s'\n", tok->filepath, tok->line, tok->col, tok->value, get_token_str(tok->type));
 	}
 
     return 0;

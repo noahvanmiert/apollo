@@ -7,6 +7,7 @@
 #ifndef __TOKEN_H_
 #define __TOKEN_H_
 
+#include <stddef.h>
 
 enum TokenType {
     TOKEN_WORD,
@@ -20,12 +21,23 @@ enum TokenType {
 };
 
 
+struct CToken {
+	char value;
+
+	const char *filepath;
+	size_t line;
+	size_t col;
+};
+
+
 struct Token {
     enum TokenType type;
     const char *value;
 
-	struct Token *prev;
-	struct Token *next;
+	const char *filepath;
+	size_t line;
+	size_t col;
+
 };
 
 

@@ -12,12 +12,14 @@
 #include <stddef.h>
 
 struct Lexer {
-	const char *data;
+	const char *filepath;
+	struct CToken *data;
 	size_t index;
-	char current;
+	struct CToken current;
 };
 
 
+void lexer_init(struct Lexer *lexer, const char *filepath);
 struct Token *lexer_get_token(struct Lexer *lexer);
 
 

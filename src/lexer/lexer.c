@@ -13,6 +13,76 @@
 #include <stdlib.h>
 
 
+#define FILE_BUFFER_CAP 4096
+
+
+static struct CToken *read_file(const char *filepath)
+{
+	FILE *fptr = fopen(filepath, "r");
+
+	if (fptr == NULL) {
+		fprintf(stderr, "error: could not open file '%s'\n", filepath);
+		exit(1);
+	}
+
+	struct CToken *buffer = malloc(FILE_BUFFER_CAP * sizeof(struct CToken));
+	size_t buffer_size = FILE_BUFFER_CAP;
+	size_t buffer_index = 0;
+
+	char c = ' ';
+	size_t line = 1;
+	size_t col = 0;
+
+	while (c != EOF) {
+		if (buffer_index >= buffer_size) {
+			buffer = realloc(buffer, buffer_size + FILE_BUFFER_CAP);
+			buffer_size += FILE_BUFFER_CAP;
+		}
+
+		c = fgetc(fptr);
+		
+		if (c == '\n') {
+			line++;
+			col = 1;
+		}
+
+		if (c != EOF) {
+			buffer[buffer_index].filepath = filepath;
+			buffer[buffer_index].line = line;
+			buffer[buffer_index].col = col;
+			buffer[buffer_index].value = c;
+
+			buffer_index++;
+		}
+
+		col++;
+	}
+	
+	if (buffer_index > 1) {
+		buffer = realloc(buffer, (buffer_index + 1) * sizeof(struct CToken));
+		buffer[buffer_index].value = '\n';
+
+		return buffer;
+	}
+
+	buffer = realloc(buffer, 1 * sizeof(struct CToken));
+	buffer->value = '\0';
+
+	return buffer;
+}
+
+
+void lexer_init(struct Lexer *lexer, const char *filepath)
+{
+	assert(lexer != NULL && "error: NULL pointer passed to lexer_init()");
+	
+	lexer->filepath = filepath;
+	lexer->data = read_file(filepath);
+	lexer->index = 0;
+	lexer->current = lexer->data[0];
+}
+
+
 static inline void advance(struct Lexer *lexer)
 {
 	lexer->index++;
@@ -22,22 +92,36 @@ static inline void advance(struct Lexer *lexer)
 
 static inline void skip_white(struct Lexer *lexer)
 {
-	while (isspace(lexer->current))
+	while (isspace(lexer->current.value))
 		advance(lexer);
+}
+
+
+static struct Token *prepare_tok_for_ret(struct Lexer *lexer, struct Token *tok)
+{
+	advance(lexer);
+
+	tok->filepath = lexer->current.filepath;
+	tok->line = lexer->current.line;
+	tok->col = lexer->current.col;
+
+	return tok;
 }
 
 
 static struct Token *parse_special(struct Lexer *lexer)
 {
-	switch (lexer->current) {
-		case '(': advance(lexer); return create_token(TOKEN_LPAREN, "(");
-		case ')': advance(lexer); return create_token(TOKEN_RPAREN, ")");
-		case '{': advance(lexer); return create_token(TOKEN_LCURL, "{");
-		case '}': advance(lexer); return create_token(TOKEN_RCURL, "}");
-		case ';': advance(lexer); return create_token(TOKEN_SEMICOLON, ";");
+	switch (lexer->current.value) {
+		case '(': return prepare_tok_for_ret(lexer, create_token(TOKEN_LPAREN, "("));
+		case ')': return prepare_tok_for_ret(lexer, create_token(TOKEN_RPAREN, ")"));
+		case '{': return prepare_tok_for_ret(lexer, create_token(TOKEN_LCURL, "{"));
+		case '}': return prepare_tok_for_ret(lexer, create_token(TOKEN_RCURL, "}"));
+		case ';': return prepare_tok_for_ret(lexer, create_token(TOKEN_SEMICOLON, ";"));
+
+		case '\0': return NULL;
 
 		default: {
-			fprintf(stderr, "\033[31;1merror: unkown character '%c' with ASCII-code '%d'\n\033[0m", lexer->current, (int) lexer->current);
+			fprintf(stderr, "\033[31;1merror: unkown character '%c' with ASCII-code '%d'\n\033[0m", lexer->current.value, (int) lexer->current.value);
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -50,17 +134,25 @@ static struct Token *parse_word(struct Lexer *lexer)
 
 	assert(word && "error: apollo compiler could not allocate enough memory");
 
+	size_t line = lexer->current.line;
+	size_t col = lexer->current.col;
 
-	while (isalpha(lexer->current)) {
+	while (isalpha(lexer->current.value)) {
 		word = realloc(word, (strlen(word) + 2) * sizeof(char));
 
 		/* Add the current character to the word */
-		strcat(word, (char []) {lexer->current, '\0'});
+		strcat(word, (char []) {lexer->current.value, '\0'});
 		advance(lexer);
 	}
 
 
-	return create_token(TOKEN_WORD, word);
+	struct Token *tok = create_token(TOKEN_WORD, word);
+
+	tok->filepath = lexer->current.filepath;
+	tok->line = line;
+	tok->col = col;
+
+	return tok;
 }
 
 
@@ -73,20 +165,29 @@ static struct Token *parse_str(struct Lexer *lexer)
 	/* To jump over the first '"' */
 	advance(lexer);
 
+	size_t line = lexer->current.line;
+	size_t col = lexer->current.col;
 
-	while (lexer->current != '"') {
+	while (lexer->current.value != '"') {
 		str = realloc(str, (strlen(str) + 2) * sizeof(char));
 
 		/* Add the current character to the string literal */
-		strcat(str, (char []) {lexer->current, '\0'});
+		strcat(str, (char []) {lexer->current.value, '\0'});
 		advance(lexer);
 	}
 
 
 	/* To jump over the last '"' */
 	advance(lexer);
+	
+	struct Token *tok = create_token(TOKEN_STR, str);
 
-	return create_token(TOKEN_STR, str);
+	tok->filepath = lexer->current.filepath;
+	tok->line = line;
+	tok->col = col;
+
+	return tok;
+
 }
 
 
@@ -96,37 +197,47 @@ static struct Token *parse_number(struct Lexer *lexer)
 	
 	assert(number && "error: apollo compiler could not allocate enough memory");
 
+	size_t line = lexer->current.line;
+	size_t col = lexer->current.col;
 
-	while (isalnum(lexer->current)) {
+
+	while (isalnum(lexer->current.value)) {
 		number = realloc(number, (strlen(number) + 2) * sizeof(char));
 
 		/* Add the current character to the number literal */
-		strcat(number, (char []) {lexer->current, '\0'});
+		strcat(number, (char []) {lexer->current.value, '\0'});
 		advance(lexer);
 	}
 
 
-	return create_token(TOKEN_INT, number);
+	struct Token *tok = create_token(TOKEN_INT, number);
+
+	tok->filepath = lexer->current.filepath;
+	tok->line = line;
+	tok->col = col;
+
+	return tok;
+
 }
 
 
 struct Token *lexer_get_token(struct Lexer *lexer)
 {
-	if (lexer->current != '\0') {
+	if (lexer->current.value != '\0') {
 		skip_white(lexer);
 	
 		/* Parse a full word */
-		if (isalpha(lexer->current))
+		if (isalpha(lexer->current.value))
 			return parse_word(lexer);
 
 
 		/* Parse a number literal */
-		if (isalnum(lexer->current))
+		if (isalnum(lexer->current.value))
 			return parse_number(lexer);
 
 
 		/* Parse a string literal */
-		if (lexer->current == '"')
+		if (lexer->current.value == '"')
 			return parse_str(lexer);
 
 
