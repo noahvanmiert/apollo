@@ -11,9 +11,25 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 
 #define FILE_BUFFER_CAP 4096
+
+static_assert(FILE_BUFFER_CAP > 0, "error: FILE_BUFFER_CAP should always be higher then zero");
+
+void apo_compiler_err(const char *filepath, size_t line, size_t col, const char *fmt, ...)
+{
+	va_list args;
+	va_start(args, fmt);
+
+	printf("\033[1;31m");
+	printf("%s: %zu: %zu: ", filepath, line, col);
+	vprintf(fmt, args);
+	printf("\033[0m\n");
+
+	exit(EXIT_FAILURE);
+}
 
 
 static struct CToken *read_file(const char *filepath)
@@ -31,7 +47,7 @@ static struct CToken *read_file(const char *filepath)
 
 	char c = ' ';
 	size_t line = 1;
-	size_t col = 0;
+	size_t col = 1;
 
 	while (c != EOF) {
 		if (buffer_index >= buffer_size) {
@@ -121,10 +137,17 @@ static struct Token *parse_special(struct Lexer *lexer)
 		case '\0': return NULL;
 
 		default: {
-			fprintf(stderr, "\033[31;1merror: unkown character '%c' with ASCII-code '%d'\n\033[0m", lexer->current.value, (int) lexer->current.value);
-			exit(EXIT_FAILURE);
+			apo_compiler_err(
+					lexer->current.filepath,
+					lexer->current.line,
+					lexer->current.col,
+					"unkown character '%c'",
+					lexer->current.value
+			);
 		}
 	}
+
+	return NULL;
 }
 
 

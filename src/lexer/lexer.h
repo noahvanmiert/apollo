@@ -22,5 +22,6 @@ struct Lexer {
 void lexer_init(struct Lexer *lexer, const char *filepath);
 struct Token *lexer_get_token(struct Lexer *lexer);
 
+void apo_compiler_err(const char *filepath, size_t line, size_t col, const char *fmt, ...);
 
 #endif // __LEXER_H_
