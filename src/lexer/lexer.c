@@ -15,8 +15,8 @@
 
 
 #define FILE_BUFFER_CAP 4096
-
 static_assert(FILE_BUFFER_CAP > 0, "error: FILE_BUFFER_CAP should always be higher then zero");
+
 
 void apo_compiler_err(const char *filepath, size_t line, size_t col, const char *fmt, ...)
 {
@@ -32,57 +32,66 @@ void apo_compiler_err(const char *filepath, size_t line, size_t col, const char 
 }
 
 
-static struct CToken *read_file(const char *filepath)
+struct CToken *read_file(const char *filepath)
 {
 	FILE *fptr = fopen(filepath, "r");
 
-	if (fptr == NULL) {
-		fprintf(stderr, "error: could not open file '%s'\n", filepath);
+	if (!fptr) {
+		fprintf(stderr, "\033[1;31merror: could not open file '%s'\033[0m\n", filepath);
 		exit(1);
 	}
 
 	struct CToken *buffer = malloc(FILE_BUFFER_CAP * sizeof(struct CToken));
+	
+	if (!buffer) {
+		fprintf(stderr, "error: memory allocation failed\n");
+		exit(1);
+	}
+
 	size_t buffer_size = FILE_BUFFER_CAP;
 	size_t buffer_index = 0;
+	size_t line = 1, col = 1;
 
-	char c = ' ';
-	size_t line = 1;
-	size_t col = 1;
-
-	while (c != EOF) {
+	while (1) {
 		if (buffer_index >= buffer_size) {
-			buffer = realloc(buffer, buffer_size + FILE_BUFFER_CAP);
 			buffer_size += FILE_BUFFER_CAP;
+			buffer = realloc(buffer, buffer_size * sizeof(struct CToken));
+
+			if (!buffer) {
+				fprintf(stderr, "error: memory allocation failed\n");
+				exit(1);
+			}
 		}
 
-		c = fgetc(fptr);
-		
+		char c = fgetc(fptr);
+		if (c == EOF) break;
+
+		buffer[buffer_index].filepath = filepath;
+		buffer[buffer_index].line = line;
+		buffer[buffer_index].col = col;
+		buffer[buffer_index].value = c;
+
+		buffer_index++;
+
+
 		if (c == '\n') {
 			line++;
 			col = 1;
+		} else {
+			col++;
 		}
-
-		if (c != EOF) {
-			buffer[buffer_index].filepath = filepath;
-			buffer[buffer_index].line = line;
-			buffer[buffer_index].col = col;
-			buffer[buffer_index].value = c;
-
-			buffer_index++;
-		}
-
-		col++;
-	}
-	
-	if (buffer_index > 1) {
-		buffer = realloc(buffer, (buffer_index + 1) * sizeof(struct CToken));
-		buffer[buffer_index].value = '\n';
-
-		return buffer;
 	}
 
-	buffer = realloc(buffer, 1 * sizeof(struct CToken));
-	buffer->value = '\0';
+	fclose(fptr);
+
+	buffer = realloc(buffer, (buffer_index + 1) * sizeof(struct CToken));
+
+	if (!buffer) {
+		fprintf(stderr, "error: memory allocation failed\n");
+		exit(1);
+	}
+
+	buffer[buffer_index].value = '\0';
 
 	return buffer;
 }
@@ -214,6 +223,32 @@ static struct Token *parse_str(struct Lexer *lexer)
 }
 
 
+static struct Token *parse_char(struct Lexer *lexer)
+{
+	/* To jump over the first ' */
+	advance(lexer);
+
+	char *chr = calloc(2, sizeof(char));
+	*chr = lexer->current.value;
+
+	struct Token *tok = create_token(TOKEN_CHAR, chr);
+
+	tok->filepath = lexer->current.filepath;
+	tok->line = lexer->current.line;
+	tok->col = lexer->current.col;
+
+	advance(lexer);
+
+	if (lexer->current.value != '\'')
+		apo_compiler_err(tok->filepath, tok->line, tok->col, "char literal has multiple characters");
+
+	/* To jump over the last ' */
+	advance(lexer);
+
+	return tok;
+}
+
+
 static struct Token *parse_number(struct Lexer *lexer)
 {
 	char *number = calloc(1, sizeof(char));
@@ -262,6 +297,10 @@ struct Token *lexer_get_token(struct Lexer *lexer)
 		/* Parse a string literal */
 		if (lexer->current.value == '"')
 			return parse_str(lexer);
+
+		/* Parse a char literal */
+		if (lexer->current.value == '\'')
+			return parse_char(lexer);
 
 
 		/* Parse a char like '{', '}', ... */

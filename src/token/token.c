@@ -15,6 +15,7 @@ const char *get_token_str(enum TokenType type)
     switch (type) {
 		case TOKEN_WORD:      return "TOKEN_WORD";
 		case TOKEN_STR:       return "TOKEN_STR";
+		case TOKEN_CHAR:	  return "TOKEN_CHAR";
 		case TOKEN_INT:		  return "TOKEN_INT";
 		case TOKEN_LPAREN:    return "TOKEN_LPAREN";
 		case TOKEN_RPAREN:    return "TOKEN_RPAREN";
@@ -32,10 +33,17 @@ struct Token *create_token(enum TokenType type, const char *value)
 {
     struct Token *token = malloc(sizeof(struct Token));
     
-	assert(token && "error: compiler could not allocate enough memory");
-    
+	if (!token) {
+		fprintf(stderr, "error: memory allocation failed\n");
+		exit(1);
+	}	
+
     token->type = type;
     token->value = value;
+
+	token->filepath = NULL;
+	token->line = 0;
+	token->col = 0;
 
     return token;
 }
