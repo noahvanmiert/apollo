@@ -11,16 +11,18 @@
 #include "../token/token.h"
 #include <stddef.h>
 
-struct Lexer {
+typedef struct {
 	const char *filepath;
-	struct CToken *data;
+
+	ctoken_t *data;
+	ctoken_t current;
 	size_t index;
-	struct CToken current;
-};
+} lexer_t;
 
 
-void lexer_init(struct Lexer *lexer, const char *filepath);
-struct Token *lexer_get_token(struct Lexer *lexer);
+void lexer_init(lexer_t *lexer, const char *filepath);
+
+token_t *lexer_get_token(lexer_t *lexer);
 
 void apo_compiler_err(const char *filepath, size_t line, size_t col, const char *fmt, ...);
 

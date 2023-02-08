@@ -10,7 +10,7 @@
 #include <stdio.h>
 
 
-const char *get_token_str(enum TokenType type)
+const char *get_token_str(tokentype_t type)
 {
     switch (type) {
 		case TOKEN_WORD:      return "TOKEN_WORD";
@@ -29,9 +29,9 @@ const char *get_token_str(enum TokenType type)
 }
 
 
-struct Token *create_token(enum TokenType type, const char *value)
+token_t *token_new(tokentype_t type, const char *value)
 {
-    struct Token *token = malloc(sizeof(struct Token));
+    token_t *token = malloc(sizeof(token_t));
     
 	if (!token) {
 		fprintf(stderr, "error: memory allocation failed\n");

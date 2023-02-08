@@ -14,9 +14,8 @@
 #include <stdarg.h>
 
 
-#define FILE_BUFFER_CAP   4096
-#define MEMORY_CHECK(ptr) if (!ptr) { fprintf(stderr, "error: memory allocation failed"); exit(1); }
-
+#define FILE_BUFFER_CAP  	4096
+#define MEMORY_CHECK(ptr)	if (!ptr) { fprintf(stderr, "error: memory allocation failed"); exit(1); }
 
 
 void apo_compiler_err(const char *filepath, size_t line, size_t col, const char *fmt, ...)
@@ -33,7 +32,7 @@ void apo_compiler_err(const char *filepath, size_t line, size_t col, const char 
 }
 
 
-struct CToken *read_file(const char *filepath)
+static ctoken_t *read_file(const char *filepath)
 {
 	FILE *fptr = fopen(filepath, "r");
 
@@ -42,7 +41,7 @@ struct CToken *read_file(const char *filepath)
 		exit(1);
 	}
 
-	struct CToken *buffer = malloc(FILE_BUFFER_CAP * sizeof(struct CToken));
+	ctoken_t *buffer = malloc(FILE_BUFFER_CAP * sizeof(ctoken_t));
 	
 	MEMORY_CHECK(buffer);
 
@@ -53,7 +52,7 @@ struct CToken *read_file(const char *filepath)
 	while (1) {
 		if (buffer_index >= buffer_size) {
 			buffer_size += FILE_BUFFER_CAP;
-			buffer = realloc(buffer, buffer_size * sizeof(struct CToken));
+			buffer = realloc(buffer, buffer_size * sizeof(ctoken_t));
 			
 			MEMORY_CHECK(buffer);
 		}
@@ -79,7 +78,7 @@ struct CToken *read_file(const char *filepath)
 
 	fclose(fptr);
 
-	buffer = realloc(buffer, (buffer_index + 1) * sizeof(struct CToken));
+	buffer = realloc(buffer, (buffer_index + 1) * sizeof(ctoken_t));
 
 	MEMORY_CHECK(buffer);
 
@@ -89,7 +88,7 @@ struct CToken *read_file(const char *filepath)
 }
 
 
-void lexer_init(struct Lexer *lexer, const char *filepath)
+void lexer_init(lexer_t *lexer, const char *filepath)
 {	
 	lexer->filepath = filepath;
 	lexer->data = read_file(filepath);
@@ -98,21 +97,21 @@ void lexer_init(struct Lexer *lexer, const char *filepath)
 }
 
 
-static inline void advance(struct Lexer *lexer)
+static inline void advance(lexer_t *lexer)
 {
 	lexer->index++;
 	lexer->current = lexer->data[lexer->index];
 }
 
 
-static inline void skip_white(struct Lexer *lexer)
+static inline void skip_white(lexer_t *lexer)
 {
 	while (isspace(lexer->current.value))
 		advance(lexer);
 }
 
 
-static struct Token *prepare_tok_for_ret(struct Lexer *lexer, struct Token *tok)
+static token_t *prepare_tok_for_ret(lexer_t *lexer, token_t *tok)
 {
 	advance(lexer);
 
@@ -124,14 +123,14 @@ static struct Token *prepare_tok_for_ret(struct Lexer *lexer, struct Token *tok)
 }
 
 
-static struct Token *parse_special(struct Lexer *lexer)
+static token_t *parse_special(lexer_t *lexer)
 {
 	switch (lexer->current.value) {
-		case '(': return prepare_tok_for_ret(lexer, create_token(TOKEN_LPAREN, "("));
-		case ')': return prepare_tok_for_ret(lexer, create_token(TOKEN_RPAREN, ")"));
-		case '{': return prepare_tok_for_ret(lexer, create_token(TOKEN_LCURL, "{"));
-		case '}': return prepare_tok_for_ret(lexer, create_token(TOKEN_RCURL, "}"));
-		case ';': return prepare_tok_for_ret(lexer, create_token(TOKEN_SEMICOLON, ";"));
+		case '(': return prepare_tok_for_ret(lexer, token_new(TOKEN_LPAREN, "("));
+		case ')': return prepare_tok_for_ret(lexer, token_new(TOKEN_RPAREN, ")"));
+		case '{': return prepare_tok_for_ret(lexer, token_new(TOKEN_LCURL, "{"));
+		case '}': return prepare_tok_for_ret(lexer, token_new(TOKEN_RCURL, "}"));
+		case ';': return prepare_tok_for_ret(lexer, token_new(TOKEN_SEMICOLON, ";"));
 
 		case '\0': return NULL;
 
@@ -150,7 +149,7 @@ static struct Token *parse_special(struct Lexer *lexer)
 }
 
 
-static struct Token *parse_word(struct Lexer *lexer)
+static token_t *parse_word(lexer_t *lexer)
 {
 	char *word = calloc(1, sizeof(char));
 
@@ -170,7 +169,12 @@ static struct Token *parse_word(struct Lexer *lexer)
 	}
 
 
-	struct Token *tok = create_token(TOKEN_WORD, word);
+	token_t *tok = token_new(TOKEN_WORD, word);
+
+	/*
+		TODO:Keywords should not have type TOKEN_WORD
+		but type TOKEN_KEYWORD
+	*/
 
 	tok->filepath = lexer->current.filepath;
 	tok->line = line;
@@ -180,7 +184,7 @@ static struct Token *parse_word(struct Lexer *lexer)
 }
 
 
-static struct Token *parse_str(struct Lexer *lexer)
+static token_t *parse_str(lexer_t *lexer)
 {
 	char *str = calloc(1, sizeof(char));
 
@@ -206,7 +210,7 @@ static struct Token *parse_str(struct Lexer *lexer)
 	/* To jump over the last '"' */
 	advance(lexer);
 	
-	struct Token *tok = create_token(TOKEN_STR, str);
+	token_t *tok = token_new(TOKEN_STR, str);
 
 	tok->filepath = lexer->current.filepath;
 	tok->line = line;
@@ -217,7 +221,7 @@ static struct Token *parse_str(struct Lexer *lexer)
 }
 
 
-static struct Token *parse_char(struct Lexer *lexer)
+static token_t *parse_char(lexer_t *lexer)
 {
 	/* To jump over the first ' */
 	advance(lexer);
@@ -228,7 +232,7 @@ static struct Token *parse_char(struct Lexer *lexer)
 
 	*chr = lexer->current.value;
 
-	struct Token *tok = create_token(TOKEN_CHAR, chr);
+	token_t *tok = token_new(TOKEN_CHAR, chr);
 
 	tok->filepath = lexer->current.filepath;
 	tok->line = lexer->current.line;
@@ -246,7 +250,7 @@ static struct Token *parse_char(struct Lexer *lexer)
 }
 
 
-static struct Token *parse_number(struct Lexer *lexer)
+static token_t *parse_number(lexer_t *lexer)
 {
 	char *number = calloc(1, sizeof(char));
 
@@ -267,7 +271,7 @@ static struct Token *parse_number(struct Lexer *lexer)
 	}
 
 
-	struct Token *tok = create_token(TOKEN_INT, number);
+	token_t *tok = token_new(TOKEN_INT, number);
 
 	tok->filepath = lexer->current.filepath;
 	tok->line = line;
@@ -278,7 +282,7 @@ static struct Token *parse_number(struct Lexer *lexer)
 }
 
 
-struct Token *lexer_get_token(struct Lexer *lexer)
+token_t *lexer_get_token(lexer_t *lexer)
 {
 	if (lexer->current.value != '\0') {
 		skip_white(lexer);

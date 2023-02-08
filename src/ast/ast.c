@@ -6,10 +6,17 @@
 #include "ast.h"
 
 #include <stdlib.h>
+#include <stdio.h>
 
-struct Ast *create_ast(enum AstType type)
+
+ast_t *ast_new(ast_type type)
 {
-	struct Ast *ast = malloc(sizeof(struct Ast));
+	ast_t *ast = malloc(sizeof(ast_t));
+
+	if (!ast) { 
+		fprintf(stderr, "error: memory allocation failed");
+		exit(1); 
+	}
 
 	ast->type = type;
 
