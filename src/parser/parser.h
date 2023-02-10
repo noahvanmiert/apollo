@@ -26,6 +26,7 @@ ast_t *parser_parse_statement(parser_t *parser, scope_t *scope);
 
 ast_t *parser_parse_word(parser_t *parser, scope_t *scope);
 
-ast_t *parser_parse_function(parser_t *parser, scope_t *scope);
+ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope);
+ast_t *parser_parse_fn_call(parser_t *parser, scope_t *scope);
 
 #endif // __PARSER_H_

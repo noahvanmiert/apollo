@@ -70,11 +70,11 @@ ast_t *parser_parse_statements(parser_t *parser, scope_t *scope)
 
 ast_t *parser_parse_statement(parser_t *parser, scope_t *scope)
 {
-    switch (parser->current->type)
-    {
-    case TOKEN_WORD: return parser_parse_word(parser, scope);
+    switch (parser->current->type) {
+        case TOKEN_WORD:  return parser_parse_word(parser, scope);
+        case TOKEN_RCURL: return ast_new(AST_NOP);
     
-    default: assert(0 && "unreachable in parser_parse_statement()");
+        default: assert(0 && "unreachable in parser_parse_statement()");
     }
 }
 
@@ -82,15 +82,17 @@ ast_t *parser_parse_statement(parser_t *parser, scope_t *scope)
 ast_t *parser_parse_word(parser_t *parser, scope_t *scope)
 {
     if (strcmp(parser->current->value, "func") == 0)
-        return parser_parse_function(parser, scope);
+        return parser_parse_fn_def(parser, scope);
 
-    return NULL;
+    return parser_parse_fn_call(parser, scope);
 }
 
 
-ast_t *parser_parse_function(parser_t *parser, scope_t *scope)
+ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
 {
     ast_t *fn_def = ast_new(AST_FUNCTION_DEF);
+
+    eat(parser, TOKEN_WORD);
 
     fn_def->function_def_name = parser->current->value;
     eat(parser, TOKEN_WORD);
@@ -98,6 +100,8 @@ ast_t *parser_parse_function(parser_t *parser, scope_t *scope)
     eat(parser, TOKEN_LPAREN);
     eat(parser, TOKEN_RPAREN);
     eat(parser, TOKEN_LCURL);
+
+    // TODO: check if function is already defined
 
     /* 
         TODO: change scope the create a new scope
@@ -120,5 +124,37 @@ ast_t *parser_parse_function(parser_t *parser, scope_t *scope)
         );
     }
 
+    scope_add_function(scope, fn_def);
+
     return fn_def;
 }
+
+
+ast_t *parser_parse_fn_call(parser_t *parser, scope_t *scope)
+{
+    ast_t *fn_call = ast_new(AST_FUNCTION_CALL);
+
+    fn_call->function_call_name = parser->current->value;
+    eat(parser, TOKEN_WORD);
+
+
+    /* Check if function exists in current scope. */
+    if (scope_get_function(scope, fn_call->function_call_name) == NULL) {
+        apo_compiler_err(
+            parser->current->filepath,
+            parser->current->line,
+            parser->current->col,
+            "error: undefined function '%s'",
+            fn_call->function_call_name
+        );
+    }
+
+
+    eat(parser, TOKEN_LPAREN);
+    eat(parser, TOKEN_RPAREN);
+
+    return fn_call;
+}
+
+
+// TODO: check for semicolon after statement

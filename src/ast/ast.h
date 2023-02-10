@@ -12,7 +12,8 @@
 typedef enum {
 	AST_COMPOUND,
 	AST_FUNCTION_DEF,
-	AST_FUNCTION_CALL
+	AST_FUNCTION_CALL,
+	AST_NOP
 } ast_type;
 
 

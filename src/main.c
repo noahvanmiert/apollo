@@ -11,11 +11,13 @@ int main(void)
 {
 	lexer_t lexer;
 	parser_t parser;
-
+	scope_t globl_scope;
+	
 	lexer_init(&lexer, "examples/write.apo");
 	parser_init(&parser, &lexer);
+	scope_init(&globl_scope);
 
-	printf("%s\n", parser.current->value);
+	parser_parse(&parser, &globl_scope);
 
     return 0;
 }
