@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <string.h>
+#include <stdio.h>
 
 
 void parser_init(parser_t *parser, lexer_t *lexer)
@@ -48,6 +49,11 @@ static void __compound_list_add(ast_t *ast, ast_t *item)
         ast->compound_value,
         (++ast->compound_size) * sizeof(ast_t *)
     );
+
+    if (ast->compound_value == NULL) {
+        fprintf(stderr, "error: memory allocation failed\n");
+        exit(EXIT_FAILURE);
+    }
 
     ast->compound_value[ast->compound_size - 1] = item;
 }

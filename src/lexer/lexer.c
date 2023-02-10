@@ -24,7 +24,7 @@ void apo_compiler_err(const char *filepath, size_t line, size_t col, const char 
 	va_start(args, fmt);
 
 	printf("\033[1;31m");
-	printf("%s: %zu: %zu: ", filepath, line, col);
+	printf("%s:%zu:%zu: ", filepath, line, col);
 	vprintf(fmt, args);
 	printf("\033[0m\n");
 
@@ -32,7 +32,7 @@ void apo_compiler_err(const char *filepath, size_t line, size_t col, const char 
 }
 
 
-static ctoken_t *read_file(const char *filepath)
+static ctoken_t *__read_file(const char *filepath)
 {
 	FILE *fptr = fopen(filepath, "r");
 
@@ -91,29 +91,29 @@ static ctoken_t *read_file(const char *filepath)
 void lexer_init(lexer_t *lexer, const char *filepath)
 {	
 	lexer->filepath = filepath;
-	lexer->data = read_file(filepath);
+	lexer->data = __read_file(filepath);
 	lexer->index = 0;
 	lexer->current = lexer->data[0];
 }
 
 
-static inline void advance(lexer_t *lexer)
+static inline void __advance(lexer_t *lexer)
 {
 	lexer->index++;
 	lexer->current = lexer->data[lexer->index];
 }
 
 
-static inline void skip_white(lexer_t *lexer)
+static inline void __skip_white(lexer_t *lexer)
 {
 	while (isspace(lexer->current.value))
-		advance(lexer);
+		__advance(lexer);
 }
 
 
-static token_t *prepare_tok_for_ret(lexer_t *lexer, token_t *tok)
+static token_t *__prepare_tok_for_ret(lexer_t *lexer, token_t *tok)
 {
-	advance(lexer);
+	__advance(lexer);
 
 	tok->filepath = lexer->current.filepath;
 	tok->line = lexer->current.line;
@@ -123,14 +123,14 @@ static token_t *prepare_tok_for_ret(lexer_t *lexer, token_t *tok)
 }
 
 
-static token_t *parse_special(lexer_t *lexer)
+static token_t *__parse_special(lexer_t *lexer)
 {
 	switch (lexer->current.value) {
-		case '(': return prepare_tok_for_ret(lexer, token_new(TOKEN_LPAREN, "("));
-		case ')': return prepare_tok_for_ret(lexer, token_new(TOKEN_RPAREN, ")"));
-		case '{': return prepare_tok_for_ret(lexer, token_new(TOKEN_LCURL, "{"));
-		case '}': return prepare_tok_for_ret(lexer, token_new(TOKEN_RCURL, "}"));
-		case ';': return prepare_tok_for_ret(lexer, token_new(TOKEN_SEMICOLON, ";"));
+		case '(': return __prepare_tok_for_ret(lexer, token_new(TOKEN_LPAREN, "("));
+		case ')': return __prepare_tok_for_ret(lexer, token_new(TOKEN_RPAREN, ")"));
+		case '{': return __prepare_tok_for_ret(lexer, token_new(TOKEN_LCURL, "{"));
+		case '}': return __prepare_tok_for_ret(lexer, token_new(TOKEN_RCURL, "}"));
+		case ';': return __prepare_tok_for_ret(lexer, token_new(TOKEN_SEMICOLON, ";"));
 
 		case '\0': return NULL;
 
@@ -149,7 +149,7 @@ static token_t *parse_special(lexer_t *lexer)
 }
 
 
-static token_t *parse_word(lexer_t *lexer)
+static token_t *__parse_word(lexer_t *lexer)
 {
 	char *word = calloc(1, sizeof(char));
 
@@ -165,7 +165,7 @@ static token_t *parse_word(lexer_t *lexer)
 		
 		/* Add the current character to the word */
 		strcat(word, (char []) {lexer->current.value, '\0'});
-		advance(lexer);
+		__advance(lexer);
 	}
 
 
@@ -184,14 +184,14 @@ static token_t *parse_word(lexer_t *lexer)
 }
 
 
-static token_t *parse_str(lexer_t *lexer)
+static token_t *__parse_str(lexer_t *lexer)
 {
 	char *str = calloc(1, sizeof(char));
 
 	MEMORY_CHECK(str);
 
 	/* To jump over the first '"' */
-	advance(lexer);
+	__advance(lexer);
 
 	size_t line = lexer->current.line;
 	size_t col = lexer->current.col;
@@ -203,12 +203,12 @@ static token_t *parse_str(lexer_t *lexer)
 
 		/* Add the current character to the string literal */
 		strcat(str, (char []) {lexer->current.value, '\0'});
-		advance(lexer);
+		__advance(lexer);
 	}
 
 
 	/* To jump over the last '"' */
-	advance(lexer);
+	__advance(lexer);
 	
 	token_t *tok = token_new(TOKEN_STR, str);
 
@@ -221,10 +221,10 @@ static token_t *parse_str(lexer_t *lexer)
 }
 
 
-static token_t *parse_char(lexer_t *lexer)
+static token_t *__parse_char(lexer_t *lexer)
 {
 	/* To jump over the first ' */
-	advance(lexer);
+	__advance(lexer);
 
 	char *chr = calloc(2, sizeof(char));
 
@@ -238,19 +238,19 @@ static token_t *parse_char(lexer_t *lexer)
 	tok->line = lexer->current.line;
 	tok->col = lexer->current.col;
 
-	advance(lexer);
+	__advance(lexer);
 
 	if (lexer->current.value != '\'')
 		apo_compiler_err(tok->filepath, tok->line, tok->col, "char literal has multiple characters");
 
 	/* To jump over the last ' */
-	advance(lexer);
+	__advance(lexer);
 
 	return tok;
 }
 
 
-static token_t *parse_number(lexer_t *lexer)
+static token_t *__parse_number(lexer_t *lexer)
 {
 	char *number = calloc(1, sizeof(char));
 
@@ -267,7 +267,7 @@ static token_t *parse_number(lexer_t *lexer)
 
 		/* Add the current character to the number literal */
 		strcat(number, (char []) {lexer->current.value, '\0'});
-		advance(lexer);
+		__advance(lexer);
 	}
 
 
@@ -285,29 +285,29 @@ static token_t *parse_number(lexer_t *lexer)
 token_t *lexer_get_token(lexer_t *lexer)
 {
 	if (lexer->current.value != '\0') {
-		skip_white(lexer);
+		__skip_white(lexer);
 	
 		/* Parse a full word */
 		if (isalpha(lexer->current.value))
-			return parse_word(lexer);
+			return __parse_word(lexer);
 
 
 		/* Parse a number literal */
 		if (isalnum(lexer->current.value))
-			return parse_number(lexer);
+			return __parse_number(lexer);
 
 
 		/* Parse a string literal */
 		if (lexer->current.value == '"')
-			return parse_str(lexer);
+			return __parse_str(lexer);
 
 		/* Parse a char literal */
 		if (lexer->current.value == '\'')
-			return parse_char(lexer);
+			return __parse_char(lexer);
 
 
 		/* Parse a char like '{', '}', ... */
-		return parse_special(lexer);
+		return __parse_special(lexer);
 	}
 
 	return NULL;
