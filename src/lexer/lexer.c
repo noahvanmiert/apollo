@@ -13,15 +13,23 @@
 #include <stdlib.h>
 #include <stdarg.h>
 
-
 #define FILE_BUFFER_CAP  	4096
 #define MEMORY_CHECK(ptr)	if (!ptr) { fprintf(stderr, "error: memory allocation failed"); exit(1); }
 
 
+/*
+ *	Prints a given error message, with the format: 'filepath:line:col: message'.
+ *	@param filepath: The filepath of file where the error occurd.
+ *	@param line: 	 The line where the error occurd.
+ *	@param col:		 The col where the error occured.
+ *	@return:		 Nothing
+*/
 void apo_compiler_err(const char *filepath, size_t line, size_t col, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
+
+	// TODO: add macros for terminal colors
 
 	printf("\033[1;31m");
 	printf("%s:%zu:%zu: ", filepath, line, col);
@@ -32,6 +40,11 @@ void apo_compiler_err(const char *filepath, size_t line, size_t col, const char 
 }
 
 
+/*
+ *	Reads a file and returns an array were every character is converted into a character token (ctoken_t *).
+ *	@param filepath: The filepath to open.
+ *  @return:         The array of character tokens (ctoken_t *)
+*/
 static ctoken_t *__read_file(const char *filepath)
 {
 	FILE *fptr = fopen(filepath, "r");
@@ -88,6 +101,12 @@ static ctoken_t *__read_file(const char *filepath)
 }
 
 
+/*
+ *	Initializes a lexer object.
+ *	@param lexer:    The lexer object.
+ *	@param filepath: The filepath of the source file.
+ *  @return:		 Nothing
+*/
 void lexer_init(lexer_t *lexer, const char *filepath)
 {	
 	lexer->filepath = filepath;
@@ -97,6 +116,11 @@ void lexer_init(lexer_t *lexer, const char *filepath)
 }
 
 
+/*
+ *	Advanced the lexer to the next character.
+ *	@param lexer: The lexer object.
+ *  @return:	  Nothing
+*/
 static inline void __advance(lexer_t *lexer)
 {
 	lexer->index++;
@@ -104,6 +128,11 @@ static inline void __advance(lexer_t *lexer)
 }
 
 
+/*
+ *	Advances while the current token is a space or space like character (\n, \t, ...)
+ *	@param lexer: The lexer object.
+ *	@return: 	  Nothing
+*/
 static inline void __skip_white(lexer_t *lexer)
 {
 	while (isspace(lexer->current.value))
@@ -111,6 +140,12 @@ static inline void __skip_white(lexer_t *lexer)
 }
 
 
+/*
+ *	Advances and copies the position of the lexer's current token to the given token.
+ *	@param lexer: The lexer object.
+ *	@param tok:	  A token object, this object will be returned in lexer_get_token()
+ *  @return:	  The given token object (@param tok).
+*/
 static token_t *__prepare_tok_for_ret(lexer_t *lexer, token_t *tok)
 {
 	__advance(lexer);
@@ -123,6 +158,11 @@ static token_t *__prepare_tok_for_ret(lexer_t *lexer, token_t *tok)
 }
 
 
+/*
+ *	Parses a special character like '(', if the character is unkown there we be printed an error.
+ *  @param lexer: The lexer object.
+ *  @return:	  The token generated from the current character.
+*/
 static token_t *__parse_special(lexer_t *lexer)
 {
 	switch (lexer->current.value) {
@@ -149,6 +189,11 @@ static token_t *__parse_special(lexer_t *lexer)
 }
 
 
+/*
+ *	Parses a single word.
+ *	@param lexer: The lexer object.
+ *	@return:	  The token with the generated word.
+*/
 static token_t *__parse_word(lexer_t *lexer)
 {
 	char *word = calloc(1, sizeof(char));
@@ -184,6 +229,11 @@ static token_t *__parse_word(lexer_t *lexer)
 }
 
 
+/*
+ *	Parse a single string literal.
+ *	@param lexer: The lexer object.
+ *	@return:	  The token with the generated word.
+*/
 static token_t *__parse_str(lexer_t *lexer)
 {
 	char *str = calloc(1, sizeof(char));
@@ -221,6 +271,11 @@ static token_t *__parse_str(lexer_t *lexer)
 }
 
 
+/*
+ *	Parses a single character literal.
+ *	@param lexer: The lexer object.
+ *	@return:	  The token with the generated char.
+*/
 static token_t *__parse_char(lexer_t *lexer)
 {
 	/* To jump over the first ' */
@@ -250,6 +305,11 @@ static token_t *__parse_char(lexer_t *lexer)
 }
 
 
+/*
+ *	Parses a signle number literal.
+ *	@param lexer: The lexer object.
+ *	@return: 	  The token with the generated number.
+*/
 static token_t *__parse_number(lexer_t *lexer)
 {
 	char *number = calloc(1, sizeof(char));
@@ -282,6 +342,11 @@ static token_t *__parse_number(lexer_t *lexer)
 }
 
 
+/*
+ *	Parses an returns the next token, the info about were we are in the source code is in the lexer object.
+ *	@param lexer: The lexer object.
+ *	@return:	  The next token.
+*/
 token_t *lexer_get_token(lexer_t *lexer)
 {
 	if (lexer->current.value != '\0') {
