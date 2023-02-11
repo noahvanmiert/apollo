@@ -19,6 +19,13 @@ $(BIN)/$(EXEC): $(OBJS)
 run:
 	./$(BIN)/$(EXEC)
 
+make-output:
+	as -arch arm64 -o output.o output.s
+	ld -o output output.o -lSystem -syslibroot `xcrun -sdk macosx --show-sdk-path` -e _start -arch arm64
+
+run-output:
+	./output
+
 clean:
 	rm -f $(BIN)/*
 	rm -f $(SRC)/*.o

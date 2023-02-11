@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include "parser/parser.h"
+#include "compiler/compiler.h"
 
 
 int main(void)
@@ -18,6 +19,8 @@ int main(void)
 	scope_init(&globl_scope);
 
 	parser_parse(&parser, &globl_scope);
+
+	compiler_write_asm("output.s");
 
     return 0;
 }
