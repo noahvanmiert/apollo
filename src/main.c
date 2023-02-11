@@ -18,8 +18,11 @@ int main(void)
 	parser_init(&parser, &lexer);
 	scope_init(&globl_scope);
 
-	parser_parse(&parser, &globl_scope);
+	
 
+	ast_t *root = parser_parse(&parser, &globl_scope);
+
+	compiler_compile(root);
 	compiler_write_asm("output.s");
 
     return 0;
