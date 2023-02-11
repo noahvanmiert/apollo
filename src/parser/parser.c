@@ -11,6 +11,12 @@
 #include <stdio.h>
 
 
+/*
+ *  Initializes a parser object.
+ *  @param parser: The parser object.
+ *  @param lexer:  The lexer object, it's is used to get the tokens.
+ *  @return:       Nothing
+*/
 void parser_init(parser_t *parser, lexer_t *lexer)
 {
     parser->lexer = lexer;
@@ -20,13 +26,26 @@ void parser_init(parser_t *parser, lexer_t *lexer)
 }
 
 
+/*
+ *  Wrapper around parser_parse_statements, this will parse a list of
+ *  tokens, the tokens are got from the lexer inside the parser.
+ *  @param parser: The parse object.
+ *  @param scope:  A scope object, this keeps track of definitions.
+ *  @return:       The root AST.
+*/
 ast_t *parser_parse(parser_t *parser, scope_t *scope)
 {
     return parser_parse_statements(parser, scope);
 }
 
 
-static void eat(parser_t *parser, tokentype_t expected)
+/*
+ *  Check if the current token has the expected type, then advance to the next token.
+ *  @param parser:   The parser object.
+ *  @param expected: The expected token type (tokentype_t).
+ *  @return:         Nothing
+*/
+static void __consume(parser_t *parser, tokentype_t expected)
 {
     if (parser->current->type != expected) {
         apo_compiler_err(
@@ -43,6 +62,12 @@ static void eat(parser_t *parser, tokentype_t expected)
 }
 
 
+/*
+ *  Add an item to the compound list of an AST.
+ *  @param ast:  The ast were the item wil be added to.
+ *  @param item: The item that will be added.
+ *  @return:     Nothing
+*/
 static void __compound_list_add(ast_t *ast, ast_t *item)
 {
     ast->compound_value = realloc(
@@ -59,6 +84,12 @@ static void __compound_list_add(ast_t *ast, ast_t *item)
 }
 
 
+/*
+ *  Parses statements and adds it to the compound list of the root AST.
+ *  @param parser: The parser object.
+ *  @param scope:  The current scope object.
+ *  @return:       The compound AST.
+*/
 ast_t *parser_parse_statements(parser_t *parser, scope_t *scope)
 {
     ast_t *compound = ast_new(AST_COMPOUND);
@@ -66,7 +97,7 @@ ast_t *parser_parse_statements(parser_t *parser, scope_t *scope)
     __compound_list_add(compound, parser_parse_statement(parser, scope));
 
     while (parser->current->type == TOKEN_SEMICOLON) {
-        eat(parser, TOKEN_SEMICOLON);
+        __consume(parser, TOKEN_SEMICOLON);
         __compound_list_add(compound, parser_parse_statement(parser, scope));
     }
 
@@ -74,6 +105,12 @@ ast_t *parser_parse_statements(parser_t *parser, scope_t *scope)
 }
 
 
+/*
+ *  Parses an individual statement.
+ *  @param parser: The parser object.
+ *  @param scope:  The current scope object.
+ *  @return:       The Ast generated for the statement.
+*/
 ast_t *parser_parse_statement(parser_t *parser, scope_t *scope)
 {
     switch (parser->current->type) {
@@ -85,6 +122,12 @@ ast_t *parser_parse_statement(parser_t *parser, scope_t *scope)
 }
 
 
+/*
+ *  Parses a word, like 'func' for function definitions.
+ *  @param parser: The parser object.
+ *  @param scope:  The current scope object.
+ *  @return:       The AST generated for the statement or definition.
+*/
 ast_t *parser_parse_word(parser_t *parser, scope_t *scope)
 {
     if (strcmp(parser->current->value, "func") == 0)
@@ -94,30 +137,36 @@ ast_t *parser_parse_word(parser_t *parser, scope_t *scope)
 }
 
 
+/*
+ *  Parses a funtion definition.
+ *  @param parser: The parser object.
+ *  @param scope:  The current scope object.
+ *  @return:       The AST containing the function definiton.
+*/
 ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
 {
     ast_t *fn_def = ast_new(AST_FUNCTION_DEF);
 
-    eat(parser, TOKEN_WORD);
+    __consume(parser, TOKEN_WORD);
 
     fn_def->function_def_name = parser->current->value;
-    eat(parser, TOKEN_WORD);
+    __consume(parser, TOKEN_WORD);
 
-    eat(parser, TOKEN_LPAREN);
-    eat(parser, TOKEN_RPAREN);
-    eat(parser, TOKEN_LCURL);
+    __consume(parser, TOKEN_LPAREN);
+    __consume(parser, TOKEN_RPAREN);
+    __consume(parser, TOKEN_LCURL);
 
     // TODO: check if function is already defined
 
     /* 
-        TODO: change scope the create a new scope
+        TODO: change scope the cr__consumee a new scope
         and copy all the content into the new one
     */
     fn_def->function_def_body = parser_parse_statements(parser, scope);
 
     /*
         We need to manualy check if the current token is }
-        because if we eat() it we can't parse the next token
+        because if we __consume() it we can't parse the next token
         in parser_parse_statements()
     */
     if (parser->current->type != TOKEN_RCURL) {
@@ -136,12 +185,18 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
 }
 
 
+/*
+ *  Parses a function call.
+ *  @param parser: The parser object.
+ *  @param scope:  The current scope object.
+ *  @return:       The AST containing the function call.
+*/
 ast_t *parser_parse_fn_call(parser_t *parser, scope_t *scope)
 {
     ast_t *fn_call = ast_new(AST_FUNCTION_CALL);
 
     fn_call->function_call_name = parser->current->value;
-    eat(parser, TOKEN_WORD);
+    __consume(parser, TOKEN_WORD);
 
 
     /* Check if function exists in current scope. */
@@ -156,8 +211,8 @@ ast_t *parser_parse_fn_call(parser_t *parser, scope_t *scope)
     }
 
 
-    eat(parser, TOKEN_LPAREN);
-    eat(parser, TOKEN_RPAREN);
+    __consume(parser, TOKEN_LPAREN);
+    __consume(parser, TOKEN_RPAREN);
 
     return fn_call;
 }

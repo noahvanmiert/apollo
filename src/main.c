@@ -18,8 +18,6 @@ int main(void)
 	parser_init(&parser, &lexer);
 	scope_init(&globl_scope);
 
-	
-
 	ast_t *root = parser_parse(&parser, &globl_scope);
 
 	compiler_compile(root);
