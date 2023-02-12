@@ -10,7 +10,7 @@ SRC = src
 EXEC = apollo
 BIN = bin
 
-SRCS = $(wildcard $(SRC)/*.c $(SRC)/**/*.c)
+SRCS = $(wildcard $(SRC)/*.c $(SRC)/**/*.c $(SRC)/**/**/*.c)
 OBJS = $(SRCS:.c=.o)
 
 $(BIN)/$(EXEC): $(OBJS)
@@ -30,3 +30,4 @@ clean:
 	rm -f $(BIN)/*
 	rm -f $(SRC)/*.o
 	rm -f $(SRC)/**/*.o
+	rm -f $(SRC)/**/**/*.o

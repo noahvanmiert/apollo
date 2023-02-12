@@ -1,5 +1,10 @@
-func test() {
+func hello() {
 
+}
+
+func test() {
+	hello();
+	hello();
 }
 
 func main() {

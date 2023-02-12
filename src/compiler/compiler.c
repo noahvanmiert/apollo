@@ -11,13 +11,8 @@
 #include <string.h>
 
 
-static const char *arm64_setup_code = ".global _start\n"
-                                      ".align 2\n"
-                                      "_start:\n"
-                                      "\tbl main\n"
-                                      "\tmov X0, #0\n"
-                                      "\tmov X16, 1\n"
-                                      "\tsvc #0x80\n\n";
+/* for arm64 specific assembly */
+#include "arm64/arm64_compiler.h"
 
 
 static char *code_section = NULL;
@@ -28,7 +23,7 @@ static char *code_section = NULL;
  *  @param str: The string that will be added to the code section.
  *  @return:    Nothing
 */
-static void code_section_add(const char *str)
+void code_section_add(const char *str)
 {
     size_t size = strlen(str);
 
@@ -59,6 +54,7 @@ void compiler_write_asm(const char *filepath)
         exit(1);
     }
 
+    /* for now we only support arm64 */
     fputs(arm64_setup_code, fptr);
     fputs(code_section, fptr);
 
@@ -114,30 +110,8 @@ void compiler_compile_compound(ast_t *node)
 */
 void compiler_compile_fn_def(ast_t *node)
 {
-    char *template = calloc(strlen(node->function_def_name) * 2 + 10, sizeof(char));
-    sprintf(template, "%s:   ; @%s\n", node->function_def_name, node->function_def_name);
-
-    const char *stack_frame = "\tstp x29, x30, [sp, #-16]!  ; 16-byte folded spill\n"
-                              "\tmov x29, sp\n";
-
-    code_section_add(template);
-    code_section_add(stack_frame);
-
-    /* compile the function body */
-    compile_statement(node->function_def_body);
-
-    free(template);
-
-    code_section_add(
-        "\tldp x29, x30, [sp], #16  ; 16-byte folded reload\n"
-        "\tret    ; @"
-    );
-
-    template = calloc(strlen(node->function_def_name) + 7, sizeof(char));
-    sprintf(template, "%s-end\n\n", node->function_def_name);
-
-    code_section_add(template);
-    free(template);
+    /* for now we only support arm64 platforms */
+    arm64_compile_fn_def(node);
 }
 
 
@@ -148,11 +122,6 @@ void compiler_compile_fn_def(ast_t *node)
 */
 void compiler_compile_fn_call(ast_t *node)
 {
-    printf("called\n");
-    char *template = calloc(strlen(node->function_call_name) + 5, sizeof(char));
-    sprintf(template, "\tbl %s\n", node->function_call_name);
-
-    code_section_add(template);
-
-    free(template);
+    /* for now we only support arm64 platforms */
+    arm64_compile_fn_call(node);
 }
