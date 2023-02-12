@@ -10,9 +10,11 @@
 #include <assert.h>
 #include <string.h>
 
-
 /* for arm64 specific assembly */
 #include "arm64/arm64_compiler.h"
+
+
+#define MEMORY_CHECK(ptr)	if (!ptr) { fprintf(stderr, "error: memory allocation failed"); exit(1); }
 
 
 static char *code_section = NULL;
@@ -33,7 +35,8 @@ void code_section_add(const char *str)
         /* allocate an extra byte '+ 1' for the '\0' character */
         code_section = realloc(code_section, (strlen(code_section) + size + 1) * sizeof(char));
     }
-
+    
+    MEMORY_CHECK(code_section);
     strcat(code_section, str);
 
     code_section[strlen(code_section)] = '\0'; 

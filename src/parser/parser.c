@@ -11,6 +11,9 @@
 #include <stdio.h>
 
 
+#define MEMORY_CHECK(ptr)	if (!ptr) { fprintf(stderr, "error: memory allocation failed"); exit(1); }
+
+
 /*
  *  Initializes a parser object.
  *  @param parser: The parser object.
@@ -76,10 +79,7 @@ static void __compound_list_add(ast_t *ast, ast_t *item)
         (++ast->compound_size) * sizeof(ast_t *)
     );
 
-    if (ast->compound_value == NULL) {
-        fprintf(stderr, "error: memory allocation failed\n");
-        exit(EXIT_FAILURE);
-    }
+    MEMORY_CHECK(ast->compound_value);
 
     ast->compound_value[ast->compound_size - 1] = item;
 }
