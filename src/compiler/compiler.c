@@ -11,19 +11,24 @@
 #include <string.h>
 
 
-static const char *nasm_setup_code = ".global _start\n"
-                                     ".align 2\n"
-                                     "_start:\n"
-                                     "\tbl main\n"
-                                     "\tmov X0, #0\n"
-                                     "\tmov X16, 1\n"
-                                     "\tsvc #0x80\n\n";
+static const char *arm64_setup_code = ".global _start\n"
+                                      ".align 2\n"
+                                      "_start:\n"
+                                      "\tbl main\n"
+                                      "\tmov X0, #0\n"
+                                      "\tmov X16, 1\n"
+                                      "\tsvc #0x80\n\n";
 
 
 static char *code_section = NULL;
 
 
-void code_section_add(const char *str)
+/*
+ *  Adds a string to the code section of the assembly.
+ *  @param str: The string that will be added to the code section.
+ *  @return:    Nothing
+*/
+static void code_section_add(const char *str)
 {
     size_t size = strlen(str);
 
@@ -40,6 +45,11 @@ void code_section_add(const char *str)
 }
 
 
+/*
+ *  Writes the generated to a file.
+ *  @param filepath: The filepath of the output file.
+ *  @return:         Nothing
+*/
 void compiler_write_asm(const char *filepath)
 {
     FILE *fptr = fopen(filepath, "w");
@@ -49,20 +59,30 @@ void compiler_write_asm(const char *filepath)
         exit(1);
     }
 
-    fputs(nasm_setup_code, fptr);
+    fputs(arm64_setup_code, fptr);
     fputs(code_section, fptr);
 
     fclose(fptr);
 }
 
 
+/*
+ *  Wrapper around compile_statement().
+ *  @param root: The root AST.
+ *  @return:     Nothing
+*/
 void compiler_compile(ast_t *root)
 {
-    compile_statements(root);
+    compile_statement(root);
 }
 
 
-void compile_statements(ast_t *node)
+/*
+ *  Compiles a statements, it calls other functions based on the type of the node.
+ *  @param node: The statement.
+ *  @return:     Nothing
+*/
+void compile_statement(ast_t *node)
 {
     switch (node->type) {
         case AST_COMPOUND:      compiler_compile_compound(node); break;
@@ -75,13 +95,23 @@ void compile_statements(ast_t *node)
 }
 
 
+/*
+ *  Compiles a compound AST.
+ *  @param node: The compound AST.
+ *  @return:     Nothing
+*/
 void compiler_compile_compound(ast_t *node)
 {
     for (size_t i = 0; i < node->compound_size; i++)
-        compile_statements(node->compound_value[i]);
+        compile_statement(node->compound_value[i]);
 }
 
 
+/*
+ *  Compiles a function definition.
+ *  @param node: The function definition AST.
+ *  @return:     Nothing
+*/
 void compiler_compile_fn_def(ast_t *node)
 {
     char *template = calloc(strlen(node->function_def_name) * 2 + 10, sizeof(char));
@@ -94,7 +124,7 @@ void compiler_compile_fn_def(ast_t *node)
     code_section_add(stack_frame);
 
     /* compile the function body */
-    compile_statements(node->function_def_body);
+    compile_statement(node->function_def_body);
 
     free(template);
 
@@ -111,6 +141,11 @@ void compiler_compile_fn_def(ast_t *node)
 }
 
 
+/*
+ *  Compiles a function call.
+ *  @param node: The function call AST.
+ *  @return:     Nothing
+*/
 void compiler_compile_fn_call(ast_t *node)
 {
     printf("called\n");
