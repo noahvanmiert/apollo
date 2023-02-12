@@ -17,7 +17,7 @@ static const char *nasm_setup_code = ".global _start\n"
                                      "\tbl main\n"
                                      "\tmov X0, #0\n"
                                      "\tmov X16, 1\n"
-                                     "\tsvc #0x80\n";
+                                     "\tsvc #0x80\n\n";
 
 
 static char *code_section = NULL;
@@ -84,8 +84,9 @@ void compiler_compile_compound(ast_t *node)
 
 void compiler_compile_fn_def(ast_t *node)
 {
-    char *template = calloc(strlen(node->function_def_name) + 4, sizeof(char));
-    sprintf(template, "%s:\n", node->function_def_name);
+    char *template = calloc(strlen(node->function_def_name) * 2 + 10, sizeof(char));
+    sprintf(template, "%s:   ; @%s\n", node->function_def_name, node->function_def_name);
+
     const char *stack_frame = "\tstp x29, x30, [sp, #-16]!  ; 16-byte folded spill\n"
                               "\tmov x29, sp\n";
 
@@ -99,8 +100,14 @@ void compiler_compile_fn_def(ast_t *node)
 
     code_section_add(
         "\tldp x29, x30, [sp], #16  ; 16-byte folded reload\n"
-        "\tret\n"
+        "\tret    ; @"
     );
+
+    template = calloc(strlen(node->function_def_name) + 7, sizeof(char));
+    sprintf(template, "%s-end\n\n", node->function_def_name);
+
+    code_section_add(template);
+    free(template);
 }
 
 
