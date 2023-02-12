@@ -102,9 +102,6 @@ ast_t *parser_parse_statements(parser_t *parser, scope_t *scope)
 
 		ast_t *statement = parser_parse_statement(parser, scope);
 
-		printf("statement: %p\n", (void *) statement);
-		printf("compound: %p\n", (void *) compound);
-
 		if (parser->current == NULL)
 			break;
 

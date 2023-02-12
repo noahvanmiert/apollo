@@ -14,7 +14,7 @@
 static const char *nasm_setup_code = ".global _start\n"
                                      ".align 2\n"
                                      "_start:\n"
-                                     "\tcall main\n"
+                                     "\tbl main\n"
                                      "\tmov X0, #0\n"
                                      "\tmov X16, 1\n"
                                      "\tsvc #0x80\n";
@@ -65,10 +65,10 @@ void compiler_compile(ast_t *root)
 void compile_statements(ast_t *node)
 {
     switch (node->type) {
-        case AST_COMPOUND:     compiler_compile_compound(node); break;
-        case AST_FUNCTION_DEF: compiler_compile_fn_def(node);   break;
-        case AST_FUNCTION_CALL: compiler_compile_fn_call(node); break;
-        case AST_NOP:          return;
+        case AST_COMPOUND:      compiler_compile_compound(node); break;
+        case AST_FUNCTION_DEF:  compiler_compile_fn_def(node);   break;
+        case AST_FUNCTION_CALL: compiler_compile_fn_call(node);  break;
+        case AST_NOP:           return;
 
         default: assert(0);
     }
@@ -86,22 +86,31 @@ void compiler_compile_fn_def(ast_t *node)
 {
     char *template = calloc(strlen(node->function_def_name) + 4, sizeof(char));
     sprintf(template, "%s:\n", node->function_def_name);
-    const char *stack_frame = "\tsub sp, sp, #16\n"
-                              "\tstr w0, [sp, #12]\n";
+    const char *stack_frame = "\tstp x29, x30, [sp, #-16]!  ; 16-byte folded spill\n"
+                              "\tmov x29, sp\n";
 
     code_section_add(template);
     code_section_add(stack_frame);
 
+    /* compile the function body */
+    compile_statements(node->function_def_body);
+
     free(template);
 
-    code_section_add("\tret\n");
+    code_section_add(
+        "\tldp x29, x30, [sp], #16  ; 16-byte folded reload\n"
+        "\tret\n"
+    );
 }
 
 
 void compiler_compile_fn_call(ast_t *node)
 {
+    printf("called\n");
     char *template = calloc(strlen(node->function_call_name) + 5, sizeof(char));
-    sprintf(template, "bl %s\n", node->function_call_name);
+    sprintf(template, "\tbl %s\n", node->function_call_name);
 
     code_section_add(template);
+
+    free(template);
 }

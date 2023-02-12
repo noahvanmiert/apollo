@@ -23,5 +23,8 @@ int main(void)
 	compiler_compile(root);
 	compiler_write_asm("output.s");
 
+	/* Print 'Compilated completed succesfully' in green */
+	printf("\033[32;1mCompilation completed succesfully\033[0m\n");
+
     return 0;
 }
