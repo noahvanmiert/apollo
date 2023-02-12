@@ -99,10 +99,17 @@ ast_t *parser_parse_statements(parser_t *parser, scope_t *scope)
 
     while (parser->current->type == TOKEN_SEMICOLON) {
         __consume(parser, TOKEN_SEMICOLON);
-        __compound_list_add(compound, parser_parse_statement(parser, scope));
-    }
 
-    printf("after parse_statements() lexer current: '%s'\n", parser->current->value);
+		ast_t *statement = parser_parse_statement(parser, scope);
+
+		printf("statement: %p\n", (void *) statement);
+		printf("compound: %p\n", (void *) compound);
+
+		if (parser->current == NULL)
+			break;
+
+        __compound_list_add(compound, statement);
+    }
 
     return compound;
 }
@@ -116,7 +123,8 @@ ast_t *parser_parse_statements(parser_t *parser, scope_t *scope)
 */
 ast_t *parser_parse_statement(parser_t *parser, scope_t *scope)
 {
-    printf("parser_parse_statements(): %s\n", parser->current->value);
+	if (parser->current == NULL)
+		return ast_new(AST_NOP);
 
     switch (parser->current->type) {
         case TOKEN_WORD:  return parser_parse_word(parser, scope);

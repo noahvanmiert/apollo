@@ -4,7 +4,7 @@
 #
 
 CC = clang
-CFLAGS =  -Wall -Wextra -Werror -pedantic -std=c11
+CFLAGS =  -g -ggdb -Wall -Wextra -Werror -pedantic -std=c11
 
 SRC = src
 EXEC = apollo
