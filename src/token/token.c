@@ -22,6 +22,7 @@ const char *get_token_str(tokentype_t type)
 		case TOKEN_LCURL:     return "TOKEN_LCURL";
 		case TOKEN_RCURL:     return "TOKEN_RCURL";
 		case TOKEN_SEMICOLON: return "TOKEN_SEMICOLON";
+		case TOKEN_END:		  return "TOKEN_END";
 
 		default:
 			assert(0 && "Unkown type given to get_token_str()");

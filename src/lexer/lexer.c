@@ -375,7 +375,7 @@ token_t *lexer_get_token(lexer_t *lexer)
 		return __parse_special(lexer);
 	}
 
-	return NULL;
+	return token_new(TOKEN_END, "");
 }
 
 

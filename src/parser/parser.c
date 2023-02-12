@@ -35,7 +35,8 @@ void parser_init(parser_t *parser, lexer_t *lexer)
 */
 ast_t *parser_parse(parser_t *parser, scope_t *scope)
 {
-    return parser_parse_statements(parser, scope);
+    ast_t *root = parser_parse_statements(parser, scope);
+    return root;
 }
 
 
@@ -101,6 +102,8 @@ ast_t *parser_parse_statements(parser_t *parser, scope_t *scope)
         __compound_list_add(compound, parser_parse_statement(parser, scope));
     }
 
+    printf("after parse_statements() lexer current: '%s'\n", parser->current->value);
+
     return compound;
 }
 
@@ -113,9 +116,12 @@ ast_t *parser_parse_statements(parser_t *parser, scope_t *scope)
 */
 ast_t *parser_parse_statement(parser_t *parser, scope_t *scope)
 {
+    printf("parser_parse_statements(): %s\n", parser->current->value);
+
     switch (parser->current->type) {
         case TOKEN_WORD:  return parser_parse_word(parser, scope);
         case TOKEN_RCURL: return ast_new(AST_NOP);
+        case TOKEN_END:   return ast_new(AST_NOP);
     
         default: assert(0 && "unreachable in parser_parse_statement()");
     }
@@ -159,7 +165,7 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
     // TODO: check if function is already defined
 
     /* 
-        TODO: change scope the cr__consumee a new scope
+        TODO: change scope the a new scope
         and copy all the content into the new one
     */
     fn_def->function_def_body = parser_parse_statements(parser, scope);
@@ -178,6 +184,8 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
             parser->current->value
         );
     }
+
+    parser->current->type = TOKEN_SEMICOLON;
 
     scope_add_function(scope, fn_def);
 
@@ -209,7 +217,6 @@ ast_t *parser_parse_fn_call(parser_t *parser, scope_t *scope)
             fn_call->function_call_name
         );
     }
-
 
     __consume(parser, TOKEN_LPAREN);
     __consume(parser, TOKEN_RPAREN);

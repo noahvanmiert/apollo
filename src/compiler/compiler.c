@@ -14,7 +14,7 @@
 static const char *nasm_setup_code = ".global _start\n"
                                      ".align 2\n"
                                      "_start:\n"
-                                     //"\tcall main\n"
+                                     "\tcall main\n"
                                      "\tmov X0, #0\n"
                                      "\tmov X16, 1\n"
                                      "\tsvc #0x80\n";
@@ -67,6 +67,7 @@ void compile_statements(ast_t *node)
     switch (node->type) {
         case AST_COMPOUND:     compiler_compile_compound(node); break;
         case AST_FUNCTION_DEF: compiler_compile_fn_def(node);   break;
+        case AST_FUNCTION_CALL: compiler_compile_fn_call(node); break;
         case AST_NOP:          return;
 
         default: assert(0);
@@ -99,5 +100,8 @@ void compiler_compile_fn_def(ast_t *node)
 
 void compiler_compile_fn_call(ast_t *node)
 {
-    node->type = AST_COMPOUND;
+    char *template = calloc(strlen(node->function_call_name) + 5, sizeof(char));
+    sprintf(template, "bl %s\n", node->function_call_name);
+
+    code_section_add(template);
 }

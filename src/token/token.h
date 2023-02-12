@@ -20,6 +20,7 @@ typedef enum {
     TOKEN_LCURL,
     TOKEN_RCURL,
     TOKEN_SEMICOLON,
+    TOKEN_END
 } tokentype_t;
 
 
