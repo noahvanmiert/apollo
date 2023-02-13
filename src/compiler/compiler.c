@@ -11,7 +11,7 @@
 #include <string.h>
 
 /* for arm64 specific assembly */
-#include "arm64/arm64_compiler.h"
+#include "arm64/arm64-as.h"
 
 
 #define MEMORY_CHECK(ptr)	if (!ptr) { fprintf(stderr, "error: memory allocation failed"); exit(1); }

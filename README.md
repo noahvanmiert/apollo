@@ -12,7 +12,7 @@ My idea is to make a C like programming language. The compiler will be written i
 
 - Platforms
   - Linux
-  - macOs
+  - macOS (arm64)
   - Windows
 
 - Architectures
