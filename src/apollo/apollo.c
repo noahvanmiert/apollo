@@ -22,7 +22,13 @@ static flag_info_t flag_info = {
     .output_filepath = "output",
     .only_asm = 0,
     .verbose_output = 0,
+#ifdef __APPLE__
     .target = PLATFORM_MAC_ARM64
+#elif __linux__
+    .target = PLATFORM_LINUX_X64
+#else
+#error "unsupported platform"
+#endif
 };
 
 
