@@ -10,11 +10,16 @@
 #include "../ast/ast.h"
 #include "../scope/scope.h"
 
+#include <stdbool.h>
+
+
 typedef struct {
     lexer_t *lexer;
 
     token_t *current;
     token_t *prev;
+
+    bool in_fn_def;
 } parser_t;
 
 

@@ -45,6 +45,8 @@ void parser_init(parser_t *parser, lexer_t *lexer)
 
     parser->current = lexer_get_token(lexer);
     parser->prev = NULL;
+
+    parser->in_fn_def = false;
 }
 
 
@@ -168,6 +170,9 @@ ast_t *parser_parse_word(parser_t *parser, scope_t *scope)
 */
 ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
 {
+    if (parser->in_fn_def)
+        parser_err(parser, "error: defining a function inside another function is illigal");
+
     ast_t *fn_def = ast_new(AST_FUNCTION_DEF);
 
     __consume(parser, TOKEN_WORD);
@@ -186,11 +191,15 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
     if (scope_get_function(scope, fn_def->function_def_name) != NULL)
         parser_err(parser, "error: re-defining a function is illegal");
 
+
     /* 
         TODO: change scope the a new scope
         and copy all the content into the new one
     */
+
+    parser->in_fn_def = true;
     fn_def->function_def_body = parser_parse_statements(parser, scope);
+    parser->in_fn_def = false;
 
     /*
         We need to manualy check if the current token is }

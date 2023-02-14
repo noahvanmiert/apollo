@@ -1,11 +1,7 @@
-func testl() {
-
-}
-
 func test() {
-	
+
 }
 
 func main() {
-	test();
+
 }
