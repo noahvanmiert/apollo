@@ -68,6 +68,11 @@ static void __parse_flag(int argc, int *argv_index, char **argv, const char *fla
 
         flag_info.output_filepath = argv[*argv_index];
     }
+
+    else {
+        fprintf(stderr, TER_RED "error: unkown flag '%s'\n" TER_RESET, flag);
+        exit(1);
+    }
 }
 
 
