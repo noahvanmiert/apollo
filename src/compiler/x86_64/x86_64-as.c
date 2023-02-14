@@ -14,11 +14,17 @@ extern void compile_statement(ast_t *node);
 
 void x86_64_compile_fn_def(ast_t *node)
 {
-    char *template = calloc(strlen(node->function_def_name) * 2 + 10, sizeof(char));
-    MEMORY_CHECK(template);
-    sprintf(template, "%s:   ; @%s\n", node->function_def_name, node->function_def_name);
+	char *template = calloc(strlen(node->function_def_name), sizeof(char));
+	MEMORY_CHECK(template);
+	sprintf(template, "\t.type %s,@function\n", node->function_def_name);
+	code_section_add(template);
+	free(template);
 
-    const char *stack_frame = "\tpush %rbp  ; stack frame\n"
+    template = calloc(strlen(node->function_def_name) * 2, sizeof(char));
+    MEMORY_CHECK(template);
+    sprintf(template, "%s:   # @%s\n", node->function_def_name, node->function_def_name);
+
+    const char *stack_frame = "\tpush %rbp\n"
                               "\tmov %rsp, %rbp\n";
 
     code_section_add(template);
@@ -31,15 +37,8 @@ void x86_64_compile_fn_def(ast_t *node)
 
     code_section_add(
         "\tpop %rbp\n"
-        "\tret    ; @"
+        "\tret\n\n"
     );
-
-    template = calloc(strlen(node->function_def_name) + 7, sizeof(char));
-    MEMORY_CHECK(template);
-    sprintf(template, "%s-end\n\n", node->function_def_name);
-
-    code_section_add(template);
-    free(template);
 }
 
 void x86_64_compile_fn_call(ast_t *node)

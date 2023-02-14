@@ -159,10 +159,10 @@ void apollo_assemble(void)
 
     else if (flag_info.target == PLATFORM_LINUX_X64) {
         /* compile assembly */
-        if (system("nasm -felf64 -o output.o output.s") == 0) {
-            printf_verbose(TER_GREEN "[verbose-mode]: nasm -felf64 -o output.o output.s\n" TER_RESET);
+        if (system("as -o output.o output.s") == 0) {
+            printf_verbose(TER_GREEN "[verbose-mode]: as -o output.o output.s\n" TER_RESET);
         } else {
-            printf_verbose(TER_RED "[verbose-mode]: nasm -felf64 -o output.o output.s\n" TER_RESET);
+            printf_verbose(TER_RED "[verbose-mode]: as -felf64 -o output.o output.s\n" TER_RESET);
             exit(1);
         }
 
