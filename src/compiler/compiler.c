@@ -13,11 +13,17 @@
 /* for arm64 specific assembly */
 #include "arm64/arm64-as.h"
 
+/* for x86_64 specific assembly */
+#include "x86_64/x86_64-as.h"
+
+#include "../apollo/apollo.h"
+
 
 #define MEMORY_CHECK(ptr)	if (!ptr) { fprintf(stderr, "error: memory allocation failed"); exit(1); }
 
 
 static char *code_section = NULL;
+extern flag_info_t flag_info;
 
 
 /*
@@ -57,8 +63,21 @@ void compiler_write_asm(const char *filepath)
         exit(1);
     }
 
-    /* for now we only support arm64 */
-    fputs(arm64_setup_code, fptr);
+    switch (flag_info.target) {
+        case PLATFORM_MAC_ARM64: {
+            fputs(arm64_setup_code, fptr);
+            break;
+        }
+
+        case PLATFORM_LINUX_X64: {
+            fputs(x86_64_setup_code, fptr);
+            break;
+        }
+
+        default: assert(0 && "unkown platform");
+    }
+
+    
     fputs(code_section, fptr);
 
     fclose(fptr);
@@ -109,22 +128,44 @@ void compiler_compile_compound(ast_t *node)
 /*
  *  Compiles a function definition.
  *  @param node: The function definition AST.
- *  @return:     Nothing
 */
 void compiler_compile_fn_def(ast_t *node)
 {
-    /* for now we only support arm64 platforms */
-    arm64_compile_fn_def(node);
+    /* call the function associated with the platform */
+    switch (flag_info.target) {
+        case PLATFORM_MAC_ARM64: {
+            arm64_compile_fn_def(node);
+            break;
+        }
+
+        case PLATFORM_LINUX_X64: {
+            x86_64_compile_fn_def(node);
+            break;
+        }
+
+        default: assert(0 && "unkown platform");
+    }
 }
 
 
 /*
  *  Compiles a function call.
  *  @param node: The function call AST.
- *  @return:     Nothing
 */
 void compiler_compile_fn_call(ast_t *node)
 {
-    /* for now we only support arm64 platforms */
-    arm64_compile_fn_call(node);
+    /* call the function associated with the platform */
+    switch (flag_info.target) {
+        case PLATFORM_MAC_ARM64: {
+            arm64_compile_fn_call(node);
+            break;
+        }
+
+        case PLATFORM_LINUX_X64: {
+            x86_64_compile_fn_call(node);
+            break;
+        }
+
+        default: assert(0 && "unkown platform");
+    }
 }

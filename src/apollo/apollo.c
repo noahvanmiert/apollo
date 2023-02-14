@@ -12,9 +12,9 @@
 #include <stdarg.h>
 
 
-#define TER_GREEN "\033[32;1m"
-#define TER_RED "\033[31;1m"
-#define TER_RESET "\033[0m"
+#define TER_GREEN  "\033[32;1m"
+#define TER_RED    "\033[31;1m"
+#define TER_RESET  "\033[0m"
 
 
 static flag_info_t flag_info = {

@@ -9,13 +9,16 @@
 #include "apollo/apollo.h"
 
 
+flag_info_t flag_info;
+
+
 int main(int argc, char **argv)
 {
 	lexer_t lexer;
 	parser_t parser;
 	scope_t globl_scope;
 
-	flag_info_t flag_info = apollo_parse_arguments(argc, argv);
+	flag_info = apollo_parse_arguments(argc, argv);
 	
 	lexer_init(&lexer, flag_info.input_filepath);
 	parser_init(&parser, &lexer);
@@ -29,7 +32,7 @@ int main(int argc, char **argv)
 	if (!flag_info.only_asm)
 		apollo_assemble();
 
-	/* Print 'Compilated completed succesfully' in green */
+	/* prints 'compilated completed succesfully' in green */
 	printf("\033[32;1mCompilation completed succesfully\033[0m\n");
 
     return 0;
