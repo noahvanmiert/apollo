@@ -33,7 +33,7 @@ int main(int argc, char **argv)
 		apollo_assemble();
 
 	/* prints 'compilated completed succesfully' in green */
-	printf("\033[32;1mCompilation completed succesfully\033[0m\n");
+	printf("\033[32;1mcompilation completed succesfully\033[0m\n");
 
     return 0;
 }

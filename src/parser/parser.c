@@ -9,9 +9,28 @@
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
+#include <stdarg.h>
 
 
 #define MEMORY_CHECK(ptr)	if (!ptr) { fprintf(stderr, "error: memory allocation failed"); exit(1); }
+
+
+/*
+ *	Prints a given error message, with the format: 'filepath:line:col: message'.
+ *	@param parser: The parser object, used for the location of the current token.
+*/
+static void parser_err(parser_t *parser, const char *fmt, ...)
+{
+    va_list args;
+	va_start(args, fmt);
+
+	printf("\033[1;31m");
+	printf("%s:%zu:%zu: ", parser->current->filepath, parser->current->line, parser->current->col);
+	vprintf(fmt, args);
+	printf("\033[0m\n");
+
+	exit(EXIT_FAILURE);
+}
 
 
 /*
@@ -51,15 +70,8 @@ ast_t *parser_parse(parser_t *parser, scope_t *scope)
 */
 static void __consume(parser_t *parser, tokentype_t expected)
 {
-    if (parser->current->type != expected) {
-        apo_compiler_err(
-            parser->current->filepath,
-            parser->current->line,
-            parser->current->col,
-            "error: unexpected token '%s'\n",
-            parser->current->value
-        );
-    }
+    if (parser->current->type != expected)
+        parser_err(parser, "error: unexpected token '%s'\n", parser->current->value);
 
     parser->prev = parser->current;
     parser->current = lexer_get_token(parser->lexer);
@@ -167,7 +179,12 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
     __consume(parser, TOKEN_RPAREN);
     __consume(parser, TOKEN_LCURL);
 
-    // TODO: check if function is already defined
+    // TODO: when this function already exists the error message location is at the last brace, change
+    // this to the first char of the name
+
+    /* check if function is already defined in this scope */
+    if (scope_get_function(scope, fn_def->function_def_name) != NULL)
+        parser_err(parser, "error: re-defining a function is illegal");
 
     /* 
         TODO: change scope the a new scope
@@ -180,15 +197,8 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
         because if we __consume() it we can't parse the next token
         in parser_parse_statements()
     */
-    if (parser->current->type != TOKEN_RCURL) {
-        apo_compiler_err(
-            parser->current->filepath,
-            parser->current->line,
-            parser->current->col,
-            "error: unexpected token '%s', expected '}'\n",
-            parser->current->value
-        );
-    }
+    if (parser->current->type != TOKEN_RCURL) 
+        parser_err(parser, "error: unexpected token '%s', expected '}'\n", parser->current->value);
 
     parser->current->type = TOKEN_SEMICOLON;
 
@@ -213,15 +223,8 @@ ast_t *parser_parse_fn_call(parser_t *parser, scope_t *scope)
 
 
     /* Check if function exists in current scope. */
-    if (scope_get_function(scope, fn_call->function_call_name) == NULL) {
-        apo_compiler_err(
-            parser->current->filepath,
-            parser->current->line,
-            parser->current->col,
-            "error: undefined function '%s'",
-            fn_call->function_call_name
-        );
-    }
+    if (scope_get_function(scope, fn_call->function_call_name) == NULL)
+        parser_err(parser, "error: calling undefined function '%s'", fn_call->function_call_name);
 
     __consume(parser, TOKEN_LPAREN);
     __consume(parser, TOKEN_RPAREN);
