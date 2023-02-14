@@ -50,6 +50,19 @@ void parser_init(parser_t *parser, lexer_t *lexer)
 }
 
 
+/* 
+ *  Checks if a given word is a language keyword.
+ *  @param word: The word to check.
+*/
+static bool __is_keyword(const char *word)
+{
+    if (strcmp(word, "func") == 0)
+        return true;
+
+    return false;
+}
+
+
 /*
  *  Wrapper around parser_parse_statements, this will parse a list of
  *  tokens, the tokens are got from the lexer inside the parser.
@@ -178,8 +191,11 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
     __consume(parser, TOKEN_WORD);
 
     fn_def->function_def_name = parser->current->value;
-    __consume(parser, TOKEN_WORD);
 
+    if (__is_keyword(fn_def->function_def_name))
+        parser_err(parser, "error: illigal function name '%s', function name cannot be a language keyword", fn_def->function_def_name);
+
+    __consume(parser, TOKEN_WORD);
     __consume(parser, TOKEN_LPAREN);
     __consume(parser, TOKEN_RPAREN);
     __consume(parser, TOKEN_LCURL);
