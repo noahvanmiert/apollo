@@ -41,7 +41,6 @@ static void __print_usage(void)
     printf("        -asm        Only generates the assembly.\n");
     printf("        -mac-arm64  Generates code for arm64 (m1) with macOS.\n");
     printf("        -linux-x64  Generates code for intel x64 with Linux.\n");
-    printf("        -o <name>   Sets the name of the output files to the given name.\n");
 }
 
 
@@ -64,17 +63,6 @@ static void __parse_flag(int argc, int *argv_index, char **argv, const char *fla
     else if (strcmp(flag, "-linux-x64") == 0)
         flag_info.target = PLATFORM_LINUX_X64;
 
-    else if (strcmp(flag, "-o") == 0) {
-        assert(0 && "not implemented yet");
-
-        if (argc < ++(*argv_index)) {
-            fprintf(stderr, "\033[31;1merror: no output filepath provided after '-o' flag\n");
-            exit(1);
-        }
-
-        flag_info.output_filepath = argv[*argv_index];
-    }
-
     else {
         fprintf(stderr, TER_RED "error: unkown flag '%s'\n" TER_RESET, flag);
         exit(1);
@@ -85,7 +73,7 @@ static void __parse_flag(int argc, int *argv_index, char **argv, const char *fla
 flag_info_t apollo_parse_arguments(int argc, char **argv)
 {
     if (argc < 2) {
-        fprintf(stderr, "\033[31;1merror: no input file provided\033[0m\n");
+        fprintf(stderr, TER_RED "error: no input file provided\n" TER_RESET);
         exit(1);
     }
 
@@ -97,7 +85,7 @@ flag_info_t apollo_parse_arguments(int argc, char **argv)
     }
 
     if (flag_info.input_filepath == NULL) {
-        fprintf(stderr, "\033[31;1merror: no input filepath provided\033[0m\n");
+        fprintf(stderr, TER_RED "error: no input filepath provided\n" TER_RESET);
         exit(1);
     }
 
