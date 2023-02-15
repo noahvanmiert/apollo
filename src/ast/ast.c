@@ -25,6 +25,9 @@ ast_t *ast_new(ast_type type)
 	
 	ast->function_call_name = NULL;
 
+	ast->variable_def = NULL;
+	ast->variable_def_value = NULL;
+
 	ast->compound_value = NULL;
 	ast->compound_size = 0;
 

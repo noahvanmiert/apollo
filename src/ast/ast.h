@@ -13,6 +13,7 @@ typedef enum {
 	AST_COMPOUND,
 	AST_FUNCTION_DEF,
 	AST_FUNCTION_CALL,
+	AST_VARIABLE_DEF,
 	AST_NOP
 } ast_type;
 
@@ -26,6 +27,10 @@ typedef struct ast_t {
 	
 	/* AST_FUNCTION_CALL */
 	const char *function_call_name;
+
+	/* AST_VARIABLE_DEF */
+	const char *variable_def;
+	struct ast_t *variable_def_value;
 
 	/* AST_COMPOUND */
 	struct ast_t **compound_value;
