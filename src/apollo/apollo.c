@@ -14,6 +14,7 @@
 
 #define TER_GREEN  "\033[32;1m"
 #define TER_RED    "\033[31;1m"
+#define TER_BLUE   "\033[34;1m"
 #define TER_RESET  "\033[0m"
 
 
@@ -32,6 +33,9 @@ static flag_info_t flag_info = {
 };
 
 
+/*
+ *  Prints a little help message, you get this by running the compiler with the '-h' flag.
+*/
 static void __print_usage(void)
 {
     printf("Usage: apollo [flags] <input filepath>\n");
@@ -44,8 +48,20 @@ static void __print_usage(void)
 }
 
 
+/*
+ *  Parses a specific flag.
+ *  @param argc:       The total amount of arguments.
+ *  @param argv_index: The index of the current argument.
+ *  @param argv:       The list with arguments.
+ *  @param flag:       The current argument.
+*/
 static void __parse_flag(int argc, int *argv_index, char **argv, const char *flag)
 {
+    /* because we don't use these parameters yet. */
+    assert(argv);
+    assert(argc);
+    assert(argv_index);
+
     if (strcmp(flag, "-h") == 0) {
         __print_usage();
         exit(0);
@@ -70,6 +86,12 @@ static void __parse_flag(int argc, int *argv_index, char **argv, const char *fla
 }
 
 
+/*
+ *  Parses the command-line arguments.
+ *  @param argc: The amount of arguments.
+ *  @param argv: The list with arguments.
+ *  @return:     The struct that contains all the info about the arguments.
+*/
 flag_info_t apollo_parse_arguments(int argc, char **argv)
 {
     if (argc < 2) {
@@ -93,6 +115,11 @@ flag_info_t apollo_parse_arguments(int argc, char **argv)
 }
 
 
+/*
+ *  A wrapper around printf, the string will only be printed if the verbose
+ *  flag is set.
+ *  @param fmt: The formatted string.
+*/
 void printf_verbose(const char *fmt, ...)
 {
     if (flag_info.verbose_output) {
@@ -106,6 +133,11 @@ void printf_verbose(const char *fmt, ...)
 }
 
 
+/*
+ *  Returns the string version of the target platform.
+ *  @param target: The target platform.
+ *  @return:       The target platform as a string.
+*/
 static const char *__platform_to_str(target_platforms_t target)
 {
     switch (target) {
@@ -117,9 +149,13 @@ static const char *__platform_to_str(target_platforms_t target)
 }
 
 
+/*
+ *  Assembles the output assembly file, for macOS-arm64 platform we use the builtin assembler 'as'
+ *  and 'ld' to link it. On linux-x64 we also use the builtin assembler GAS, and also 'ld' for linking.
+*/
 void apollo_assemble(void)
 {
-    printf_verbose("target platform: %s\n\n", __platform_to_str(flag_info.target));
+    printf_verbose("target platform: \033[34;1m%s\033[0m\n\n", __platform_to_str(flag_info.target));
 
     if (flag_info.target == PLATFORM_MAC_ARM64) {
         /* compile assembly */
