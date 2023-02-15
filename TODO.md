@@ -1,0 +1,7 @@
+- [x] Function definitions
+- [ ] Conditional statements (if/else statements)
+- [ ] Loops (for/while loops)
+- [ ] Arithmetic operations (addition, subtraction, multiplication, division)
+- [ ] Bitwise operations (AND, OR, NOT)
+- [ ] Memory acces (the ability to store and retrive data)
+- [ ] Input output operations (read/write files, console I/O)

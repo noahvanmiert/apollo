@@ -2,3 +2,6 @@ bin/
 src/*.o
 
 .vscode/
+
+output
+*.o
