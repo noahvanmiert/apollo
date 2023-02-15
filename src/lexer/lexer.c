@@ -170,6 +170,7 @@ static token_t *__parse_special(lexer_t *lexer)
 		case ')': return __prepare_tok_for_ret(lexer, token_new(TOKEN_RPAREN, ")"));
 		case '{': return __prepare_tok_for_ret(lexer, token_new(TOKEN_LCURL, "{"));
 		case '}': return __prepare_tok_for_ret(lexer, token_new(TOKEN_RCURL, "}"));
+		case ':': return __prepare_tok_for_ret(lexer, token_new(TOKEN_COLON, ":"));
 		case ';': return __prepare_tok_for_ret(lexer, token_new(TOKEN_SEMICOLON, ";"));
 
 		case '\0': return NULL;

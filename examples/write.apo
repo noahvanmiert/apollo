@@ -1,7 +1,3 @@
-func test() {
-
-}
-
 func main() {
-
+    let a: int = 10;
 }
