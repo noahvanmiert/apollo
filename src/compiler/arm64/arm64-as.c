@@ -69,6 +69,7 @@ void arm64_compile_fn_call(ast_t *node)
 }
 
 
+/* not implemented yet */
 void arm64_compile_var_def(ast_t *node)
 {
     assert(node);

@@ -1,7 +1,13 @@
+/*
+ *	Made by Noah Van Miert
+ *	16/02/2023
+*/
+
 #ifndef __VARIABLE_H_
 #define __VARIABLE_H_
 
 #include "../../ast/ast.h"
+
 
 // TODO: implemented all types, uint8, uint16, ...
 

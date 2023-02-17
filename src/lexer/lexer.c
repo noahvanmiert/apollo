@@ -22,14 +22,11 @@
  *	@param filepath: The filepath of file where the error occurd.
  *	@param line: 	 The line where the error occurd.
  *	@param col:		 The col where the error occured.
- *	@return:		 Nothing
 */
 void apo_compiler_err(const char *filepath, size_t line, size_t col, const char *fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
-
-	// TODO: add macros for terminal colors
 
 	printf("\033[1;31m");
 	printf("%s:%zu:%zu: ", filepath, line, col);
@@ -131,7 +128,6 @@ static inline void __advance(lexer_t *lexer)
 /*
  *	Advances while the current token is a space or space like character (\n, \t, ...)
  *	@param lexer: The lexer object.
- *	@return: 	  Nothing
 */
 static inline void __skip_white(lexer_t *lexer)
 {
@@ -379,6 +375,3 @@ token_t *lexer_get_token(lexer_t *lexer)
 
 	return token_new(TOKEN_END, "");
 }
-
-
-// TODO: use a linked list instead of a normal array to store the tokens

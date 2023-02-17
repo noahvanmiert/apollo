@@ -1,10 +1,19 @@
+/*
+ *	Made by Noah Van Miert
+ *	16/02/2023
+*/
+
+
 #include "variable.h"
 
 #include <string.h>
 #include <assert.h>
 
-// TODO: document these functions
 
+/*
+ *  Returns the datatype corresponding to the string-version of the datatype.
+ *  @param word: The word with the string-version of the datatype.
+*/
 data_type_t get_type_from_str(const char *word)
 {
     if (strcmp(word, "uint32") == 0)
@@ -14,6 +23,10 @@ data_type_t get_type_from_str(const char *word)
 }
 
 
+/*
+ *  Returns the datatype corresponding with the AST. type.
+ *  @param ast: The AST.
+*/
 data_type_t get_type_from_ast(ast_t *ast)
 {
     switch (ast->type) {
@@ -24,6 +37,10 @@ data_type_t get_type_from_ast(ast_t *ast)
 }
 
 
+/*
+ *  Returns the string-version of a datatype.
+ *  @param type: The datatype.
+*/
 const char *get_string_from_type(data_type_t type)
 {
     switch (type) {
@@ -37,6 +54,11 @@ const char *get_string_from_type(data_type_t type)
 
 #define __TYPE_UINT32_SIZE 4
 
+
+/*
+ *  Returns the size of a datatype in bytes.
+ *  @param type: The datatype.
+*/
 int get_type_size(data_type_t type)
 {
     switch (type) {

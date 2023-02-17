@@ -1,3 +1,8 @@
+/*
+ *	Made by Noah Van Miert
+ *	13/02/2023
+*/
+
 #include "x86_64-as.h"
 
 #include <stdlib.h>
@@ -13,6 +18,10 @@ extern void code_section_add(const char *str);
 extern void compile_statement(ast_t *node);
 
 
+/*
+ *  Generates specific assembly code for function definition for the x64 platform.
+ *  @param: The function definition AST.
+*/
 void x86_64_compile_fn_def(ast_t *node)
 {
 	char *template = calloc(strlen(node->function_def_name), sizeof(char));
@@ -42,6 +51,11 @@ void x86_64_compile_fn_def(ast_t *node)
     );
 }
 
+
+/*
+ *  Generates specific assembly code for function calls for the x64 platform.
+ *  @param node: The function call AST.
+*/
 void x86_64_compile_fn_call(ast_t *node)
 {
     char *template = calloc(strlen(node->function_call_name) + 5, sizeof(char));
@@ -53,6 +67,10 @@ void x86_64_compile_fn_call(ast_t *node)
 }
 
 
+/*
+ *  Generated specific assemblt code for variable definitions for the x64 platform.
+ *  @param node: The variable definition AST.
+*/
 void x86_64_compile_var_def(ast_t *node)
 {
     if (node->variable_def_value->type == AST_UINT32) {

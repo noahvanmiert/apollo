@@ -39,4 +39,5 @@ ast_t *parser_parse_fn_call(parser_t *parser, scope_t *scope);
 
 ast_t *parser_parse_var_def(parser_t *parser, scope_t *scope);
 
+
 #endif // __PARSER_H_

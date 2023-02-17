@@ -39,7 +39,6 @@ static void parser_err(parser_t *parser, const char *fmt, ...)
  *  Initializes a parser object.
  *  @param parser: The parser object.
  *  @param lexer:  The lexer object, it's is used to get the tokens.
- *  @return:       Nothing
 */
 void parser_init(parser_t *parser, lexer_t *lexer)
 {
@@ -84,7 +83,6 @@ ast_t *parser_parse(parser_t *parser, scope_t *scope)
  *  Check if the current token has the expected type, then advance to the next token.
  *  @param parser:   The parser object.
  *  @param expected: The expected token type (tokentype_t).
- *  @return:         Nothing
 */
 static void __consume(parser_t *parser, tokentype_t expected)
 {
@@ -100,7 +98,6 @@ static void __consume(parser_t *parser, tokentype_t expected)
  *  Add an item to the compound list of an AST.
  *  @param ast:  The ast were the item wil be added to.
  *  @param item: The item that will be added.
- *  @return:     Nothing
 */
 static void __compound_list_add(ast_t *ast, ast_t *item)
 {
@@ -163,6 +160,10 @@ ast_t *parser_parse_statement(parser_t *parser, scope_t *scope)
 }
 
 
+/*
+ *  Parses an expression like a string literal, a integer literal, ...
+ *  @param parser: The parser object.
+*/
 ast_t *parser_parse_expr(parser_t *parser)
 {
     switch (parser->current->type) {
@@ -191,6 +192,10 @@ ast_t *parser_parse_word(parser_t *parser, scope_t *scope)
 }
 
 
+/*
+ *  Parses an integer literal.
+ *  @param parser: The parser object.
+*/
 ast_t *parser_parse_uint32(parser_t *parser)
 {
     ast_t *number = ast_new(AST_UINT32);
@@ -211,7 +216,7 @@ ast_t *parser_parse_uint32(parser_t *parser)
 ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
 {
     if (parser->in_fn_def)
-        parser_err(parser, "error: defining a function inside another function is illigal");
+        parser_err(parser, "error: defining a function inside another function is illegal");
 
     ast_t *fn_def = ast_new(AST_FUNCTION_DEF);
 
@@ -220,7 +225,7 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
     fn_def->function_def_name = parser->current->value;
 
     if (__is_keyword(fn_def->function_def_name))
-        parser_err(parser, "error: illigal function name '%s', function name cannot be a language keyword", fn_def->function_def_name);
+        parser_err(parser, "error: illegal function name '%s', function name cannot be a language keyword", fn_def->function_def_name);
 
     __consume(parser, TOKEN_WORD);
     __consume(parser, TOKEN_LPAREN);
@@ -284,16 +289,24 @@ ast_t *parser_parse_fn_call(parser_t *parser, scope_t *scope)
     return fn_call;
 }
 
-// TODO: check if variable and function name is legal
 
+/*
+ *  Parses a variable definition.
+ *  @param parser: The parser object.
+ *  @param scope: The scope object.
+*/
 ast_t *parser_parse_var_def(parser_t *parser, scope_t *scope)
 {
     __consume(parser, TOKEN_WORD);
 
-    assert(scope);
-
     ast_t *var_def = ast_new(AST_VARIABLE_DEF);
     var_def->variable_def_name = parser->current->value;
+
+    if (__is_keyword(parser->current->value))
+        parser_err(parser, "error: illegal function name '%s', variable name cannot be a language keyword", parser->current->value);
+
+    if (scope_get_variable(scope, parser->current->value) != NULL) 
+        parser_err(parser, "error: re-defining a variable is illegal");
 
     __consume(parser, TOKEN_WORD);
     __consume(parser, TOKEN_COLON);
@@ -313,6 +326,8 @@ ast_t *parser_parse_var_def(parser_t *parser, scope_t *scope)
 
     parser->variable_offset += get_type_size(var_type);
     var_def->variable_offset = parser->variable_offset;
+
+    scope_add_variable(scope, var_def);
 
     return var_def;
 }

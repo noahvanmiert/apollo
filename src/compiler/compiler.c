@@ -29,7 +29,6 @@ extern flag_info_t flag_info;
 /*
  *  Adds a string to the code section of the assembly.
  *  @param str: The string that will be added to the code section.
- *  @return:    Nothing
 */
 void code_section_add(const char *str)
 {
@@ -52,7 +51,6 @@ void code_section_add(const char *str)
 /*
  *  Writes the generated to a file.
  *  @param filepath: The filepath of the output file.
- *  @return:         Nothing
 */
 void compiler_write_asm(const char *filepath)
 {
@@ -70,7 +68,7 @@ void compiler_write_asm(const char *filepath)
         }
 
         case PLATFORM_LINUX_X64: {
-            fputs(x86_64_setup_code, fptr);
+            fputs(linux_x64_setup_code, fptr);
             break;
         }
 
@@ -87,7 +85,6 @@ void compiler_write_asm(const char *filepath)
 /*
  *  Wrapper around compile_statement().
  *  @param root: The root AST.
- *  @return:     Nothing
 */
 void compiler_compile(ast_t *root)
 {
@@ -98,7 +95,6 @@ void compiler_compile(ast_t *root)
 /*
  *  Compiles a statements, it calls other functions based on the type of the node.
  *  @param node: The statement.
- *  @return:     Nothing
 */
 void compile_statement(ast_t *node)
 {
@@ -117,7 +113,6 @@ void compile_statement(ast_t *node)
 /*
  *  Compiles a compound AST.
  *  @param node: The compound AST.
- *  @return:     Nothing
 */
 void compiler_compile_compound(ast_t *node)
 {
@@ -171,6 +166,11 @@ void compiler_compile_fn_call(ast_t *node)
     }
 }
 
+
+/*
+ *  Compiles a variable definition.
+ *  @param node: The variable definition AST.
+*/
 void compiler_compile_var_def(ast_t *node)
 {
     switch (flag_info.target) {
