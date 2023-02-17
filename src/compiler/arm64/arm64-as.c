@@ -8,6 +8,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 
 #define MEMORY_CHECK(ptr)	if (!ptr) { fprintf(stderr, "error: memory allocation failed"); exit(1); }
@@ -65,4 +66,10 @@ void arm64_compile_fn_call(ast_t *node)
     code_section_add(template);
 
     free(template);
+}
+
+
+void arm64_compile_var_def(ast_t *node)
+{
+    assert(node);
 }

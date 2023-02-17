@@ -21,6 +21,7 @@ typedef enum {
     TOKEN_RCURL,
     TOKEN_COLON,
     TOKEN_SEMICOLON,
+    TOKEN_EQ,
     TOKEN_END
 } tokentype_t;
 

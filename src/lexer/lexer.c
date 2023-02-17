@@ -172,6 +172,7 @@ static token_t *__parse_special(lexer_t *lexer)
 		case '}': return __prepare_tok_for_ret(lexer, token_new(TOKEN_RCURL, "}"));
 		case ':': return __prepare_tok_for_ret(lexer, token_new(TOKEN_COLON, ":"));
 		case ';': return __prepare_tok_for_ret(lexer, token_new(TOKEN_SEMICOLON, ";"));
+		case '=': return __prepare_tok_for_ret(lexer, token_new(TOKEN_EQ, "="));
 
 		case '\0': return NULL;
 
@@ -204,7 +205,7 @@ static token_t *__parse_word(lexer_t *lexer)
 	size_t line = lexer->current.line;
 	size_t col = lexer->current.col;
 
-	while (isalpha(lexer->current.value)) {
+	while (isalpha(lexer->current.value) || isalnum(lexer->current.value)) {
 		word = realloc(word, (strlen(word) + 2) * sizeof(char));
 
 		MEMORY_CHECK(word);

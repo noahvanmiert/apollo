@@ -20,5 +20,6 @@
 
 void arm64_compile_fn_def(ast_t *node);
 void arm64_compile_fn_call(ast_t *node);
+void arm64_compile_var_def(ast_t *node);
 
 #endif // __ARM64_COMPILER_H_

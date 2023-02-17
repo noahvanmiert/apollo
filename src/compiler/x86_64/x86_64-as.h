@@ -15,5 +15,6 @@
 
 void x86_64_compile_fn_def(ast_t *node);
 void x86_64_compile_fn_call(ast_t *node);
+void x86_64_compile_var_def(ast_t *node);
 
 #endif // __X86_64_AS_H_

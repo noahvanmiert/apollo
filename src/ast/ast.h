@@ -7,10 +7,12 @@
 #define __AST_H_
 
 #include <stddef.h>
+#include <stdint.h>
 
 
 typedef enum {
 	AST_COMPOUND,
+	AST_UINT32,
 	AST_FUNCTION_DEF,
 	AST_FUNCTION_CALL,
 	AST_VARIABLE_DEF,
@@ -21,6 +23,11 @@ typedef enum {
 typedef struct ast_t {
 	ast_type type;
 
+	size_t variable_offset;
+
+	/* AST_UINT32 */
+	uint32_t uint32_value;
+
 	/* AST_FUNCTION_DEF */
 	const char *function_def_name;
 	struct ast_t *function_def_body;
@@ -29,7 +36,7 @@ typedef struct ast_t {
 	const char *function_call_name;
 
 	/* AST_VARIABLE_DEF */
-	const char *variable_def;
+	const char *variable_def_name;
 	struct ast_t *variable_def_value;
 
 	/* AST_COMPOUND */

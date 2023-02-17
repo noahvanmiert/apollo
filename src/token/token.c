@@ -23,6 +23,7 @@ const char *get_token_str(tokentype_t type)
 		case TOKEN_RCURL:     return "TOKEN_RCURL";
 		case TOKEN_COLON:     return "TOKEN_COLON";
 		case TOKEN_SEMICOLON: return "TOKEN_SEMICOLON";
+		case TOKEN_EQ:		  return "TOKEN_EQ";
 		case TOKEN_END:		  return "TOKEN_END";
 
 		default:

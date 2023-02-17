@@ -11,6 +11,8 @@
 #include <stdio.h>
 #include <stdarg.h>
 
+#include "variables/variable.h"
+
 
 #define MEMORY_CHECK(ptr)	if (!ptr) { fprintf(stderr, "error: memory allocation failed"); exit(1); }
 
@@ -47,6 +49,7 @@ void parser_init(parser_t *parser, lexer_t *lexer)
     parser->prev = NULL;
 
     parser->in_fn_def = false;
+    parser->variable_offset = 0;
 }
 
 
@@ -160,6 +163,16 @@ ast_t *parser_parse_statement(parser_t *parser, scope_t *scope)
 }
 
 
+ast_t *parser_parse_expr(parser_t *parser)
+{
+    switch (parser->current->type) {
+        case TOKEN_INT: return parser_parse_uint32(parser);
+
+        default: assert(0);
+    }
+}
+
+
 /*
  *  Parses a word, like 'func' for function definitions.
  *  @param parser: The parser object.
@@ -171,7 +184,21 @@ ast_t *parser_parse_word(parser_t *parser, scope_t *scope)
     if (strcmp(parser->current->value, "func") == 0)
         return parser_parse_fn_def(parser, scope);
 
+    if (strcmp(parser->current->value, "let") == 0)
+        return parser_parse_var_def(parser, scope);
+
     return parser_parse_fn_call(parser, scope);
+}
+
+
+ast_t *parser_parse_uint32(parser_t *parser)
+{
+    ast_t *number = ast_new(AST_UINT32);
+    number->uint32_value = atoi(parser->current->value);
+
+    __consume(parser, TOKEN_INT);
+
+    return number;
 }
 
 
@@ -255,6 +282,39 @@ ast_t *parser_parse_fn_call(parser_t *parser, scope_t *scope)
     __consume(parser, TOKEN_RPAREN);
 
     return fn_call;
+}
+
+// TODO: check if variable and function name is legal
+
+ast_t *parser_parse_var_def(parser_t *parser, scope_t *scope)
+{
+    __consume(parser, TOKEN_WORD);
+
+    assert(scope);
+
+    ast_t *var_def = ast_new(AST_VARIABLE_DEF);
+    var_def->variable_def_name = parser->current->value;
+
+    __consume(parser, TOKEN_WORD);
+    __consume(parser, TOKEN_COLON);
+
+    data_type_t var_type = get_type_from_str(parser->current->value);
+
+    if (var_type == TYPE_UNKOWN)
+        parser_err(parser, "error: unkown variable type: '%s'", parser->current->value);
+
+    __consume(parser, TOKEN_WORD);
+    __consume(parser, TOKEN_EQ);
+
+    var_def->variable_def_value = parser_parse_expr(parser);
+
+    if (get_type_from_ast(var_def->variable_def_value) != var_type)
+        parser_err(parser, "error: variable value type does not match the given type");
+
+    parser->variable_offset += get_type_size(var_type);
+    var_def->variable_offset = parser->variable_offset;
+
+    return var_def;
 }
 
 

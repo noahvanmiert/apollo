@@ -3,6 +3,7 @@
 #include <string.h>
 #include <assert.h>
 
+// TODO: document these functions
 
 data_type_t get_type_from_str(const char *word)
 {
@@ -10,6 +11,16 @@ data_type_t get_type_from_str(const char *word)
         return TYPE_UINT32;
 
     return TYPE_UNKOWN;
+}
+
+
+data_type_t get_type_from_ast(ast_t *ast)
+{
+    switch (ast->type) {
+        case AST_UINT32: return TYPE_UINT32;
+
+        default: return TYPE_UNKOWN;
+    }
 }
 
 

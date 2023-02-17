@@ -20,12 +20,16 @@ ast_t *ast_new(ast_type type)
 
 	ast->type = type;
 
+	ast->variable_offset = 0;
+
+	ast->uint32_value = 0;
+
 	ast->function_def_name = NULL;
 	ast->function_def_body = NULL;
 	
 	ast->function_call_name = NULL;
 
-	ast->variable_def = NULL;
+	ast->variable_def_name = NULL;
 	ast->variable_def_value = NULL;
 
 	ast->compound_value = NULL;

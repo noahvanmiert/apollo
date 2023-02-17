@@ -13,39 +13,39 @@ is basicly useless at the moment. I would say wait a year and come back, then I 
 a functional compiler.
 
 
-# Compilation
+## Instalation
 
-## The compiler itself
 You will need to compile the compiler yourself. This is not that hard.
 
-If you have clang installed, you can just run the command below main directory.
+If you have `clang` installed, you can just run the command below main directory.
 
 ```bash
-make
+$ make
 ```
 
-If you don't have clang installed you need to install it first, for Debian-based linux distros you can type the command below in the terminal to install clang.
+If you don't have `clang` installed you need to install it first, for Debian-based linux distros you can type the command below in the terminal to install `clang`.
+
 ```bash
-sudo apt install clang
+$ sudo apt install clang
 ```
 
 for Arch-based distros
 ```bash
-sudo pacman -S clang
+$ sudo pacman -S clang
 ```
 
 ## Compiling your own apollo source files
 To compile your own apollo source files, you need to have the apollo compiler executable. If you don't
 know how to compile it, check out the section above this one 'The compiler itself'.
 
-Now to compiler your own files, this command in the terminal.
+Now to compile your own files, this command in the terminal.
 ```bash
-./bin/apollo filepath.apo 
+$ ./bin/apollo filepath.apo 
 ```
 
 Ofcourse there are flags you can enable. To get some help with all the flags you can always just run this.
 ```bash
-./bin/apollo -h
+$ ./bin/apollo -h
 ```
 
 This will give you some information about the compiler.

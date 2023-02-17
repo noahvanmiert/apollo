@@ -20,6 +20,7 @@ typedef struct {
     token_t *prev;
 
     bool in_fn_def;
+    size_t variable_offset;
 } parser_t;
 
 
@@ -28,10 +29,14 @@ void parser_init(parser_t *parser, lexer_t *lexer);
 ast_t *parser_parse(parser_t *parser, scope_t *scope);
 ast_t *parser_parse_statements(parser_t *parser, scope_t *scope);
 ast_t *parser_parse_statement(parser_t *parser, scope_t *scope);
+ast_t *parser_parse_expr(parser_t *parser);
 
 ast_t *parser_parse_word(parser_t *parser, scope_t *scope);
+ast_t *parser_parse_uint32(parser_t *parser);
 
 ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope);
 ast_t *parser_parse_fn_call(parser_t *parser, scope_t *scope);
+
+ast_t *parser_parse_var_def(parser_t *parser, scope_t *scope);
 
 #endif // __PARSER_H_

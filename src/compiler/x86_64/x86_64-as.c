@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <assert.h>
 
 
 #define MEMORY_CHECK(ptr)	if (!ptr) { fprintf(stderr, "error: memory allocation failed"); exit(1); }
@@ -49,4 +50,20 @@ void x86_64_compile_fn_call(ast_t *node)
 
     code_section_add(template);
     free(template);
+}
+
+
+void x86_64_compile_var_def(ast_t *node)
+{
+    if (node->variable_def_value->type == AST_UINT32) {
+        char *template = calloc(30, sizeof(char));
+        MEMORY_CHECK(template);
+        sprintf(template, "\tmov $%d, -%zu(%%rbp)\n", node->variable_def_value->uint32_value, node->variable_offset);
+        code_section_add(template);
+        free(template);
+
+        return;
+    }
+
+    assert(0 && "unkown variable type");
 }
