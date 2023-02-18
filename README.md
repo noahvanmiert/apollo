@@ -17,7 +17,7 @@ a functional compiler.
 
 You will need to compile the compiler yourself. This is not that hard.
 
-If you have `clang` installed, you can just run the command below main directory.
+If you have `clang` installed, you can just run the command below inside the main directory.
 
 ```bash
 $ make
@@ -88,6 +88,15 @@ func main() {
 ```
 
 Every program should have an entry point like the example above.
+
+
+To define a variable.
+```
+let variable: uint32 = 10;
+```
+
+For now only uint32 is supported.
+Variables also can be used yet, but a variable definition can be compiled on arm64 and x64.
 
 
 # Goals
