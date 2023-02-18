@@ -75,7 +75,7 @@ void x64_compile_var_def(ast_t *node)
     if (node->variable_def_value->type == AST_UINT32) {
         char *template = calloc(27 + 10 + 10, sizeof(char));
         MEMORY_CHECK(template);
-        sprintf(template, "\tmov     $%d, -%zu(%%rbp)\n", node->variable_def_value->uint32_value, node->variable_offset);
+        sprintf(template, "\tmovl    $%d, -%zu(%%rbp)\n", node->variable_def_value->uint32_value, node->variable_offset);
         code_section_add(template);
         free(template);
 
