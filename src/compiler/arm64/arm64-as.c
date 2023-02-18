@@ -18,6 +18,11 @@ extern void code_section_add(const char *str);
 extern void compile_statement(ast_t *node);
 
 
+// TODO: design a system that keeps track of the amount of bytes
+// that are stack-allocated so we need to know how much we need to 
+// subtract from the stack-pointer in the stack-frame.
+
+
 /*
  *  Generates specific assembly code for function definition for the arm64 platform.
  *  @param: The function definition AST.
@@ -28,7 +33,7 @@ void arm64_compile_fn_def(ast_t *node)
     MEMORY_CHECK(template);
     sprintf(template, "%s:   ; @%s\n", node->function_def_name, node->function_def_name);
 
-    const char *stack_frame = "\tstp x29, x30, [sp, #-16]!  ; 16-byte folded spill\n"
+    const char *stack_frame = "\tstp x29, x30, [sp, -32]!\n"
                               "\tmov x29, sp\n";
 
     code_section_add(template);
@@ -40,7 +45,7 @@ void arm64_compile_fn_def(ast_t *node)
     free(template);
 
     code_section_add(
-        "\tldp x29, x30, [sp], #16  ; 16-byte folded reload\n"
+        "\tldp x29, x30, [sp], 32\n"
         "\tret    ; @"
     );
 
@@ -72,5 +77,22 @@ void arm64_compile_fn_call(ast_t *node)
 /* not implemented yet */
 void arm64_compile_var_def(ast_t *node)
 {
-    assert(node);
+    // TODO: change this
+    const int stack_alloc_size = 32;
+
+    if (node->variable_def_value->type == AST_UINT32) {
+        char *template = calloc(14 + 10, sizeof(char));
+        MEMORY_CHECK(template);
+        sprintf(template, "\tmov w0, #%d\n", node->variable_def_value->uint32_value);
+        code_section_add(template);
+
+        template = realloc(template, (20 + 10) * sizeof(char));
+        MEMORY_CHECK(template);
+        sprintf(template, "\tstr w0, [sp, #%lu]\n", stack_alloc_size - node->variable_offset);
+        code_section_add(template);
+
+        return;
+    }
+
+    assert(0 && "unsupported datatype");
 }
