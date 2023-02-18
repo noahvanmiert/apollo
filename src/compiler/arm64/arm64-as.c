@@ -31,10 +31,10 @@ void arm64_compile_fn_def(ast_t *node)
 {
     char *template = calloc(strlen(node->function_def_name) * 2 + 10, sizeof(char));
     MEMORY_CHECK(template);
-    sprintf(template, "%s:   ; @%s\n", node->function_def_name, node->function_def_name);
+    sprintf(template, "%s:    ; @%s\n", node->function_def_name, node->function_def_name);
 
-    const char *stack_frame = "\tstp x29, x30, [sp, -32]!\n"
-                              "\tmov x29, sp\n";
+    const char *stack_frame = "\tstp     x29, x30, [sp, -32]!\n"
+                              "\tmov     x29, sp\n";
 
     code_section_add(template);
     code_section_add(stack_frame);
@@ -45,8 +45,8 @@ void arm64_compile_fn_def(ast_t *node)
     free(template);
 
     code_section_add(
-        "\tldp x29, x30, [sp], 32\n"
-        "\tret    ; @"
+        "\tldp     x29, x30, [sp], 32\n"
+        "\tret     ; @"
     );
 
     template = calloc(strlen(node->function_def_name) + 7, sizeof(char));
@@ -66,7 +66,7 @@ void arm64_compile_fn_call(ast_t *node)
 {
     char *template = calloc(strlen(node->function_call_name) + 5, sizeof(char));
     MEMORY_CHECK(template);
-    sprintf(template, "\tbl %s\n", node->function_call_name);
+    sprintf(template, "\tbl      %s\n", node->function_call_name);
 
     code_section_add(template);
 
@@ -74,7 +74,10 @@ void arm64_compile_fn_call(ast_t *node)
 }
 
 
-/* not implemented yet */
+/*
+ *  Generates specific assembly code for variable definitions for the arm64 platform.
+ *  @param node: The variable definition AST.
+*/
 void arm64_compile_var_def(ast_t *node)
 {
     // TODO: change this
@@ -83,12 +86,12 @@ void arm64_compile_var_def(ast_t *node)
     if (node->variable_def_value->type == AST_UINT32) {
         char *template = calloc(14 + 10, sizeof(char));
         MEMORY_CHECK(template);
-        sprintf(template, "\tmov w0, #%d\n", node->variable_def_value->uint32_value);
+        sprintf(template, "\tmov     w0, %d\n", node->variable_def_value->uint32_value);
         code_section_add(template);
 
         template = realloc(template, (20 + 10) * sizeof(char));
         MEMORY_CHECK(template);
-        sprintf(template, "\tstr w0, [sp, #%lu]\n", stack_alloc_size - node->variable_offset);
+        sprintf(template, "\tstr     w0, [sp, %lu]\n", stack_alloc_size - node->variable_offset);
         code_section_add(template);
 
         free(template);

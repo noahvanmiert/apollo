@@ -14,10 +14,10 @@
                                ".global _start\n" \
                                ".align 2\n" \
                                "_start:\n" \
-                               "\tbl main\n" \
-                               "\tmov X0, #0\n" \
-                               "\tmov X16, 1\n" \
-                               "\tsvc #0x80\n\n"
+                               "\tbl      main\n" \
+                               "\tmov     x0, 0\n" \
+                               "\tmov     x16, 1\n" \
+                               "\tsvc     0x80\n\n"
                                
 
 void arm64_compile_fn_def(ast_t *node);
