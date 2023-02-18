@@ -91,6 +91,8 @@ void arm64_compile_var_def(ast_t *node)
         sprintf(template, "\tstr w0, [sp, #%lu]\n", stack_alloc_size - node->variable_offset);
         code_section_add(template);
 
+        free(template);
+
         return;
     }
 
