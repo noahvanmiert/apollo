@@ -3,13 +3,12 @@
  *	31/01/2023
 */
 
-
 #ifndef __LEXER_H_
 #define __LEXER_H_
 
-
 #include "../token/token.h"
 #include <stddef.h>
+
 
 typedef struct {
 	const char *filepath;
@@ -21,9 +20,8 @@ typedef struct {
 
 
 void lexer_init(lexer_t *lexer, const char *filepath);
-
 token_t *lexer_get_token(lexer_t *lexer);
-
 void apo_compiler_err(const char *filepath, size_t line, size_t col, const char *fmt, ...);
+
 
 #endif // __LEXER_H_

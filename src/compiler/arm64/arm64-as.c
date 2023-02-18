@@ -23,13 +23,18 @@ extern void compile_statement(ast_t *node);
 // subtract from the stack-pointer in the stack-frame.
 
 
+/*
+ *  Returns the correct stackframe size for arm64, this is needed because the size needs to be divisble by 8.
+ *  @param allocated_size: The amount of bytes that needs to be allocated.
+ *  @return:               The correct frame size.
+*/
 static size_t __get_sf_size(size_t alloced_size)
 {
     assert(alloced_size < 504);
 
-    if (alloced_size < 16) return 16;
-    if (alloced_size < 32) return 32;
-    if (alloced_size < 64) return 64;
+    if (alloced_size < 16)  return 16;
+    if (alloced_size < 32)  return 32;
+    if (alloced_size < 64)  return 64;
     if (alloced_size < 128) return 128;
     if (alloced_size < 256) return 256;
     if (alloced_size < 504) return 504;

@@ -309,27 +309,38 @@ ast_t *parser_parse_var_def(parser_t *parser, scope_t *scope)
     ast_t *var_def = ast_new(AST_VARIABLE_DEF);
     var_def->variable_def_name = parser->current->value;
 
+
+    /* Check if the variable name is a keyword, this is illegal so we just print an error */
     if (__is_keyword(parser->current->value))
         parser_err(parser, "error: illegal function name '%s', variable name cannot be a language keyword", parser->current->value);
 
+
+    /* Check if the variable is already defined in the scope */
     if (scope_get_variable(scope, parser->current->value) != NULL) 
         parser_err(parser, "error: re-defining a variable is illegal");
+
 
     __consume(parser, TOKEN_WORD);
     __consume(parser, TOKEN_COLON);
 
     data_type_t var_type = get_type_from_str(parser->current->value);
 
+
+    /* Check if the variable type is valid */
     if (var_type == TYPE_UNKOWN)
         parser_err(parser, "error: unkown variable type: '%s'", parser->current->value);
+
 
     __consume(parser, TOKEN_WORD);
     __consume(parser, TOKEN_EQ);
 
     var_def->variable_def_value = parser_parse_expr(parser);
+    
 
+    /* check if the given type and the type of the value match, else we print an error */
     if (get_type_from_ast(var_def->variable_def_value) != var_type)
         parser_err(parser, "error: variable value type does not match the given type");
+
 
     parser->variable_offset += get_type_size(var_type);
 

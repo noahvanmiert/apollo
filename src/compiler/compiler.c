@@ -173,6 +173,7 @@ void compiler_compile_fn_call(ast_t *node)
 */
 void compiler_compile_var_def(ast_t *node)
 {
+    /* call the function associated with the platform */
     switch (flag_info.target) {
         case PLATFORM_MAC_ARM64: {
             arm64_compile_var_def(node);

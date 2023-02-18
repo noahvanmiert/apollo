@@ -3,7 +3,6 @@
  *	16/02/2023
 */
 
-
 #include "variable.h"
 
 #include <string.h>
