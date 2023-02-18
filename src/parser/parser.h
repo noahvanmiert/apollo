@@ -21,6 +21,7 @@ typedef struct {
 
     bool in_fn_def;
     size_t variable_offset;
+    size_t current_sf_size;
 } parser_t;
 
 

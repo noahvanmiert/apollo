@@ -23,37 +23,71 @@ extern void compile_statement(ast_t *node);
 // subtract from the stack-pointer in the stack-frame.
 
 
+static size_t __get_sf_size(size_t alloced_size)
+{
+    assert(alloced_size < 504);
+
+    if (alloced_size < 16) return 16;
+    if (alloced_size < 32) return 32;
+    if (alloced_size < 64) return 64;
+    if (alloced_size < 128) return 128;
+    if (alloced_size < 256) return 256;
+    if (alloced_size < 504) return 504;
+
+    assert(0);
+}
+
+
+static size_t __sf_size = 0;
+
+
 /*
  *  Generates specific assembly code for function definition for the arm64 platform.
  *  @param: The function definition AST.
 */
 void arm64_compile_fn_def(ast_t *node)
 {
+    __sf_size = __get_sf_size(node->stackframe.frame_size);
+
     char *template = calloc(strlen(node->function_def_name) * 2 + 10, sizeof(char));
     MEMORY_CHECK(template);
     sprintf(template, "%s:    ; @%s\n", node->function_def_name, node->function_def_name);
+    code_section_add(template);
 
-    const char *stack_frame = "\tstp     x29, x30, [sp, -32]!\n"
+    const char *stack_frame = "\tstp     x29, x30, [sp, -%zu]!\n"
                               "\tmov     x29, sp\n";
 
+    template = realloc(template, (strlen(stack_frame) + 1 + 10) * sizeof(char));
+    MEMORY_CHECK(template);
+
+    if (node->stackframe.frame_size != 0)
+        sprintf(template, stack_frame, __get_sf_size(node->stackframe.frame_size));
+    else
+        sprintf(template, stack_frame, 32);
+
     code_section_add(template);
-    code_section_add(stack_frame);
 
     /* compile the function body */
     compile_statement(node->function_def_body);
 
-    free(template);
+    stack_frame = "\tldp     x29, x30, [sp], %zu\n"
+                  "\tret     ; @";
 
-    code_section_add(
-        "\tldp     x29, x30, [sp], 32\n"
-        "\tret     ; @"
-    );
-
-    template = calloc(strlen(node->function_def_name) + 7, sizeof(char));
+    template = realloc(template, (strlen(stack_frame) + 10) * sizeof(char));
     MEMORY_CHECK(template);
-    sprintf(template, "%s-end\n\n", node->function_def_name);
+
+    if (node->stackframe.frame_size != 0)
+        sprintf(template, stack_frame, __get_sf_size(node->stackframe.frame_size));
+    else
+        sprintf(template, stack_frame, 32);
 
     code_section_add(template);
+
+    template = realloc(template, (strlen(node->function_def_name) + 7) * sizeof(char));
+    MEMORY_CHECK(template);
+    sprintf(template, "%s-end\n\n", node->function_def_name);
+    code_section_add(template);
+
     free(template);
 }
 
@@ -80,9 +114,6 @@ void arm64_compile_fn_call(ast_t *node)
 */
 void arm64_compile_var_def(ast_t *node)
 {
-    // TODO: change this
-    const int stack_alloc_size = 32;
-
     if (node->variable_def_value->type == AST_UINT32) {
         char *template = calloc(14 + 10, sizeof(char));
         MEMORY_CHECK(template);
@@ -91,7 +122,8 @@ void arm64_compile_var_def(ast_t *node)
 
         template = realloc(template, (20 + 10) * sizeof(char));
         MEMORY_CHECK(template);
-        sprintf(template, "\tstr     w0, [sp, %lu]\n", stack_alloc_size - node->variable_offset);
+        printf("sf -> %zu\n", __sf_size);
+        sprintf(template, "\tstr     w0, [sp, %lu]\n", __sf_size - node->variable_offset);
         code_section_add(template);
 
         free(template);

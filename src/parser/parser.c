@@ -49,6 +49,7 @@ void parser_init(parser_t *parser, lexer_t *lexer)
 
     parser->in_fn_def = false;
     parser->variable_offset = 0;
+    parser->current_sf_size = 0;
 }
 
 
@@ -246,7 +247,13 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
     */
 
     parser->in_fn_def = true;
+    parser->current_sf_size = 0;
     fn_def->function_def_body = parser_parse_statements(parser, scope);
+
+    stack_frame_t sf;
+    sf.frame_size = parser->current_sf_size;
+    fn_def->stackframe = sf;
+
     parser->in_fn_def = false;
 
     /*
@@ -325,7 +332,9 @@ ast_t *parser_parse_var_def(parser_t *parser, scope_t *scope)
         parser_err(parser, "error: variable value type does not match the given type");
 
     parser->variable_offset += get_type_size(var_type);
+
     var_def->variable_offset = parser->variable_offset;
+    parser->current_sf_size += parser->variable_offset;
 
     scope_add_variable(scope, var_def);
 

@@ -9,6 +9,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "../parser/stackframe/stackframe.h"
+
 
 typedef enum {
 	AST_COMPOUND,
@@ -22,6 +24,8 @@ typedef enum {
 
 typedef struct ast_t {
 	ast_type type;
+
+	stack_frame_t stackframe;
 
 	size_t variable_offset;
 
