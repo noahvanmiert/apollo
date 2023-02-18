@@ -3,6 +3,9 @@
 - [ ] Conditional statements (if/else statements)
 - [ ] Loops (for/while loops)
 - [ ] Arithmetic operations (addition, subtraction, multiplication, division)
+- [ ] Add more datatypes (uint8, uint16, uint64, int8, int16, int64, char)
+- [ ] Pointer support
+- [ ] Pointer arithmetic
 - [ ] Bitwise operations (AND, OR, NOT)
 - [ ] Memory acces (the ability to store and retrive data)
 - [ ] Input output operations (read/write files, console I/O)
