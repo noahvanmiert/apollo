@@ -13,8 +13,8 @@
 /* for arm64 specific assembly */
 #include "arm64/arm64-as.h"
 
-/* for x86_64 specific assembly */
-#include "x86_64/x86_64-as.h"
+/* for x64 specific assembly */
+#include "x64/x64-as.h"
 
 #include "../apollo/apollo.h"
 
@@ -135,7 +135,7 @@ void compiler_compile_fn_def(ast_t *node)
         }
 
         case PLATFORM_LINUX_X64: {
-            x86_64_compile_fn_def(node);
+            x64_compile_fn_def(node);
             break;
         }
 
@@ -158,7 +158,7 @@ void compiler_compile_fn_call(ast_t *node)
         }
 
         case PLATFORM_LINUX_X64: {
-            x86_64_compile_fn_call(node);
+            x64_compile_fn_call(node);
             break;
         }
 
@@ -180,7 +180,7 @@ void compiler_compile_var_def(ast_t *node)
         }
 
         case PLATFORM_LINUX_X64: {
-            x86_64_compile_var_def(node);
+            x64_compile_var_def(node);
             break;
         }
 
