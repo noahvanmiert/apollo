@@ -3,11 +3,11 @@
  *	27/01/23
 */
 
-
 #ifndef __TOKEN_H_
 #define __TOKEN_H_
 
 #include <stddef.h>
+
 
 typedef enum {
     TOKEN_WORD,
@@ -45,7 +45,6 @@ typedef struct {
 } token_t;
 
 
-const char *get_token_str(tokentype_t type);
 token_t *token_new(tokentype_t type, const char *value);
 
 

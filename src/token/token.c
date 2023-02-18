@@ -3,35 +3,18 @@
  *	27/01/23
 */
 
-
 #include "token.h"
+
 #include <assert.h>
 #include <stdlib.h>
 #include <stdio.h>
 
 
-const char *get_token_str(tokentype_t type)
-{
-    switch (type) {
-		case TOKEN_WORD:      return "TOKEN_WORD";
-		case TOKEN_STR:       return "TOKEN_STR";
-		case TOKEN_CHAR:	  return "TOKEN_CHAR";
-		case TOKEN_INT:		  return "TOKEN_INT";
-		case TOKEN_LPAREN:    return "TOKEN_LPAREN";
-		case TOKEN_RPAREN:    return "TOKEN_RPAREN";
-		case TOKEN_LCURL:     return "TOKEN_LCURL";
-		case TOKEN_RCURL:     return "TOKEN_RCURL";
-		case TOKEN_COLON:     return "TOKEN_COLON";
-		case TOKEN_SEMICOLON: return "TOKEN_SEMICOLON";
-		case TOKEN_EQ:		  return "TOKEN_EQ";
-		case TOKEN_END:		  return "TOKEN_END";
-
-		default:
-			assert(0 && "Unkown type given to get_token_str()");
-    }
-}
-
-
+/*
+ *	Allocates a new token object and initializes it.
+ *	@param type:  The type of the token.
+ *	@param value: The value of the token.
+*/
 token_t *token_new(tokentype_t type, const char *value)
 {
     token_t *token = malloc(sizeof(token_t));

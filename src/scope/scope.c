@@ -10,6 +10,10 @@
 #include <stdio.h>
 
 
+/*
+ *  Initializes a scope object.
+ *  @param scope: The scope object.
+*/
 void scope_init(scope_t *scope)
 {
     scope->function_defs = NULL;
@@ -20,6 +24,11 @@ void scope_init(scope_t *scope)
 }
 
 
+/*
+ *  Adds a function definition AST to the list of function definitions in the scope object.
+ *  @param scope:    The scope you are going to add it to.
+ *  @param function: The function definition AST you want to add.
+*/
 void scope_add_function(scope_t *scope, ast_t *function)
 {
     scope->function_defs_size++;
@@ -35,6 +44,12 @@ void scope_add_function(scope_t *scope, ast_t *function)
 }
 
 
+/*
+ *  Returns the function object corresponding to the given name, if there isn't a function that matches the
+ *  given name, NULL is returned.
+ *  @param scope: The scope you wan't to get the function from.
+ *  @param name:  The name of the function you want to get.
+*/
 ast_t *scope_get_function(scope_t *scope, const char *name)
 {
     for (size_t i = 0; i < scope->function_defs_size; i++) {
@@ -46,6 +61,11 @@ ast_t *scope_get_function(scope_t *scope, const char *name)
 }
 
 
+/*
+ *  Adds a variable definition AST to the list of variable definitions in the scope object.
+ *  @param scope:    The scope you are going to add it to.
+ *  @param variable: The variable definition AST you want to add.
+*/
 void scope_add_variable(scope_t *scope, ast_t *variable)
 {
     scope->variable_defs_size++;
@@ -61,6 +81,12 @@ void scope_add_variable(scope_t *scope, ast_t *variable)
 }
 
 
+/*
+ *  Returns the variable object corresponding to the given name, if there isn't a variable that matches the
+ *  given name, NULL is returned.
+ *  @param scope: The scope you wan't to get the variable from.
+ *  @param name:  The name of the variable you want to get.
+*/
 ast_t *scope_get_variable(scope_t *scope, const char *name)
 {
     for (size_t i = 0; i < scope->variable_defs_size; i++) {

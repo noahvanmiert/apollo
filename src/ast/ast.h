@@ -25,8 +25,10 @@ typedef enum {
 typedef struct ast_t {
 	ast_type type;
 
+	/* Only needed on arm64 */
 	stack_frame_t stackframe;
 
+	/* The offset from rbp or sp */
 	size_t variable_offset;
 
 	/* AST_UINT32 */
