@@ -88,7 +88,7 @@ ast_t *parser_parse(parser_t *parser, scope_t *scope)
 static void __consume(parser_t *parser, tokentype_t expected)
 {
     if (parser->current->type != expected)
-        parser_err(parser, "error: unexpected token '%s'\n", parser->current->value);
+        parser_err(parser, "error: unexpected token '%s'", parser->current->value);
 
     parser->prev = parser->current;
     parser->current = lexer_get_token(parser->lexer);
@@ -262,7 +262,7 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
         in parser_parse_statements()
     */
     if (parser->current->type != TOKEN_RCURL) 
-        parser_err(parser, "error: unexpected token '%s', expected '}'\n", parser->current->value);
+        parser_err(parser, "error: unexpected token '%s', expected '}'", parser->current->value);
 
     parser->current->type = TOKEN_SEMICOLON;
 
@@ -330,8 +330,17 @@ ast_t *parser_parse_var_def(parser_t *parser, scope_t *scope)
     if (var_type == TYPE_UNKOWN)
         parser_err(parser, "error: unkown variable type: '%s'", parser->current->value);
 
-
     __consume(parser, TOKEN_WORD);
+
+
+    /* if you just declare a variable 'let a: uint32;' it will be initialized with 0, unlike in c */
+    if (parser->current->type == TOKEN_SEMICOLON) {
+        var_def->variable_def_value = ast_new(AST_UINT32);
+        var_def->variable_def_value->uint32_value = 0;
+        goto out;
+    }
+
+
     __consume(parser, TOKEN_EQ);
 
     var_def->variable_def_value = parser_parse_expr(parser);
@@ -341,7 +350,7 @@ ast_t *parser_parse_var_def(parser_t *parser, scope_t *scope)
     if (get_type_from_ast(var_def->variable_def_value) != var_type)
         parser_err(parser, "error: variable value type does not match the given type");
 
-
+out:
     parser->variable_offset += get_type_size(var_type);
 
     var_def->variable_offset = parser->variable_offset;

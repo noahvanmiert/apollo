@@ -64,7 +64,7 @@ The compiler has flags you can enable, here is a list with the available flags.
 # The language
 Now I'm going to talk about the syntax of the language.
 
-To define a function.
+## To define a function.
 ```
 func name() {
     <statement>
@@ -74,7 +74,9 @@ func name() {
 }
 ```
 
-To call a function.
+---
+
+## To call a function.
 ```
 name();
 ```
@@ -89,14 +91,22 @@ func main() {
 
 Every program should have an entry point like the example above.
 
+---
 
-To define a variable.
+## To define a variable.
 ```
 let variable: uint32 = 10;
 ```
 
 For now only uint32 is supported.
 Variables also can be used yet, but a variable definition can't be compiled on arm64 and x64.
+
+If you just declare a variable, like down below.
+```
+let variable: uint32;
+```
+
+The variable will just be created an will have the value 0, unlike in c where variables are not zero-inialized.
 
 
 # Goals

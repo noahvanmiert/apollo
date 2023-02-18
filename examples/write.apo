@@ -1,9 +1,5 @@
 func test() {
-    let var: uint32 = 10;
-    let var2: uint32 = 10;
-    let var3: uint32 = 10;
-    let var4: uint32 = 10;
-    let var5: uint32 = 10;
+    let var: uint32;
 }
 
 func main() {

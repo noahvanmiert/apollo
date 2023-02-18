@@ -127,7 +127,6 @@ void arm64_compile_var_def(ast_t *node)
 
         template = realloc(template, (20 + 10) * sizeof(char));
         MEMORY_CHECK(template);
-        printf("sf -> %zu\n", __sf_size);
         sprintf(template, "\tstr     w0, [sp, %lu]\n", __sf_size - node->variable_offset);
         code_section_add(template);
 
