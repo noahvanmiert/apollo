@@ -96,7 +96,7 @@ let variable: uint32 = 10;
 ```
 
 For now only uint32 is supported.
-Variables also can be used yet, but a variable definition can be compiled on arm64 and x64.
+Variables also can be used yet, but a variable definition can't be compiled on arm64 and x64.
 
 
 # Goals
