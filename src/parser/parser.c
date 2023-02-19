@@ -48,6 +48,8 @@ void parser_init(parser_t *parser, lexer_t *lexer)
     parser->prev = NULL;
 
     parser->in_fn_def = false;
+    parser->entry_defined = false;
+
     parser->variable_offset = 0;
     parser->current_sf_size = 0;
 }
@@ -76,6 +78,12 @@ static bool __is_keyword(const char *word)
 ast_t *parser_parse(parser_t *parser, scope_t *scope)
 {
     ast_t *root = parser_parse_statements(parser, scope);
+
+    if (!parser->entry_defined) {
+        fprintf(stderr, "\033[31;1merror: no entry point defined\033[0m\n");
+        exit(1);
+    }
+
     return root;
 }
 
@@ -227,6 +235,14 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
 
     if (__is_keyword(fn_def->function_def_name))
         parser_err(parser, "error: illegal function name '%s', function name cannot be a language keyword", fn_def->function_def_name);
+
+    
+    if (!strcmp(parser->current->value, "main") && parser->entry_defined)
+        parser_err(parser, "error: entry point is already defined");
+
+    if (!strcmp(parser->current->value, "main"))
+        parser->entry_defined = true;
+
 
     __consume(parser, TOKEN_WORD);
     __consume(parser, TOKEN_LPAREN);

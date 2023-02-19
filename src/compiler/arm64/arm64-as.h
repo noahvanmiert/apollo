@@ -15,7 +15,7 @@
                                ".align 2\n" \
                                "_start:\n" \
                                "\tbl      main\n" \
-                               "\tmov     x0, 0\n" \
+                               "\tmov     x0,  0\n" \
                                "\tmov     x16, 1\n" \
                                "\tsvc     0x80\n\n"
                                

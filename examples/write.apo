@@ -1,7 +1,3 @@
-func test() {
-    let var: uint32;
-}
-
 func main() {
-    test();
+
 }

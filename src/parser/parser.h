@@ -20,6 +20,7 @@ typedef struct {
     token_t *prev;
 
     bool in_fn_def;
+    bool entry_defined;
     size_t variable_offset;
     size_t current_sf_size;
 } parser_t;
