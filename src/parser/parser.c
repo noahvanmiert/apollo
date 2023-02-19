@@ -55,6 +55,20 @@ void parser_init(parser_t *parser, lexer_t *lexer)
 }
 
 
+/*
+ *  Returns the datatype corresponding with the AST. type.
+ *  @param ast: The AST.
+*/
+data_type_t get_type_from_ast(ast_t *ast)
+{
+    switch (ast->type) {
+        case AST_UINT32: return TYPE_UINT32;
+
+        default: return TYPE_UNKOWN;
+    }
+}
+
+
 /* 
  *  Checks if a given word is a language keyword.
  *  @param word: The word to check.
@@ -288,6 +302,34 @@ ast_t *parser_parse_fn_def(parser_t *parser, scope_t *scope)
 }
 
 
+ast_t *parser_parse_variable_redef(parser_t *parser, scope_t *scope)
+{
+    ast_t *var_redef = ast_new(AST_VARIABLE_REDEF);
+    var_redef->variable_redef_name = parser->prev->value;
+
+    ast_t *var_def = scope_get_variable(scope, var_redef->variable_redef_name);
+
+
+    if (!var_def)
+        parser_err(parser, "error: undefined variable '%s'", var_redef->variable_name);
+
+    
+    var_redef->variable_redef_name = var_def->variable_def_name;
+    var_redef->variable_offset = var_def->variable_offset;
+
+    __consume(parser, TOKEN_EQ);
+
+    var_redef->variable_redef_value = parser_parse_expr(parser);
+
+
+    if (var_def->variable_def_type != get_type_from_ast(var_redef->variable_redef_value))
+        parser_err(parser, "error: the value type does not match the type of variable '%s'", var_def->variable_def_name);
+        
+
+    return var_redef;    
+}
+
+
 /*
  *  Parses a function call.
  *  @param parser: The parser object.
@@ -302,9 +344,14 @@ ast_t *parser_parse_fn_call(parser_t *parser, scope_t *scope)
     __consume(parser, TOKEN_WORD);
 
 
+    if (parser->current->type == TOKEN_EQ)
+        return parser_parse_variable_redef(parser, scope);
+
+
     /* Check if function exists in current scope. */
     if (scope_get_function(scope, fn_call->function_call_name) == NULL)
         parser_err(parser, "error: calling undefined function '%s'", fn_call->function_call_name);
+
 
     __consume(parser, TOKEN_LPAREN);
     __consume(parser, TOKEN_RPAREN);
@@ -360,6 +407,7 @@ ast_t *parser_parse_var_def(parser_t *parser, scope_t *scope)
     __consume(parser, TOKEN_EQ);
 
     var_def->variable_def_value = parser_parse_expr(parser);
+    var_def->variable_def_type = var_type;
     
 
     /* check if the given type and the type of the value match, else we print an error */

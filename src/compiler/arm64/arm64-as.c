@@ -43,6 +43,7 @@ static size_t __get_sf_size(size_t alloced_size)
 }
 
 
+/* keeps track of the current stackframe size */
 static size_t __sf_size = 0;
 
 
@@ -123,6 +124,28 @@ void arm64_compile_var_def(ast_t *node)
         char *template = calloc(14 + 10, sizeof(char));
         MEMORY_CHECK(template);
         sprintf(template, "\tmov     w0, %d\n", node->variable_def_value->uint32_value);
+        code_section_add(template);
+
+        template = realloc(template, (20 + 10) * sizeof(char));
+        MEMORY_CHECK(template);
+        sprintf(template, "\tstr     w0, [sp, %lu]\n", __sf_size - node->variable_offset);
+        code_section_add(template);
+
+        free(template);
+
+        return;
+    }
+
+    assert(0 && "unsupported datatype");
+}
+
+
+void arm64_compile_var_redef(ast_t *node)
+{
+    if (node->variable_redef_value->type == AST_UINT32) {
+        char *template = calloc(14 + 10, sizeof(char));
+        MEMORY_CHECK(template);
+        sprintf(template, "\tmov     w0, %d\n", node->variable_redef_value->uint32_value);
         code_section_add(template);
 
         template = realloc(template, (20 + 10) * sizeof(char));

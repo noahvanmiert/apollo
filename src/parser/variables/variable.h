@@ -6,8 +6,6 @@
 #ifndef __VARIABLE_H_
 #define __VARIABLE_H_
 
-#include "../../ast/ast.h"
-
 
 // TODO: implemented all types, uint8, uint16, ...
 
@@ -18,7 +16,6 @@ typedef enum {
 
 
 data_type_t get_type_from_str(const char *word);
-data_type_t get_type_from_ast(ast_t *ast);
 const char *get_string_from_type(data_type_t type);
 int get_type_size(data_type_t type);
 

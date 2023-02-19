@@ -23,20 +23,6 @@ data_type_t get_type_from_str(const char *word)
 
 
 /*
- *  Returns the datatype corresponding with the AST. type.
- *  @param ast: The AST.
-*/
-data_type_t get_type_from_ast(ast_t *ast)
-{
-    switch (ast->type) {
-        case AST_UINT32: return TYPE_UINT32;
-
-        default: return TYPE_UNKOWN;
-    }
-}
-
-
-/*
  *  Returns the string-version of a datatype.
  *  @param type: The datatype.
 */

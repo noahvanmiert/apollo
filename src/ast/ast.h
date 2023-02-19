@@ -10,6 +10,7 @@
 #include <stdint.h>
 
 #include "../parser/stackframe/stackframe.h"
+#include "../parser/variables/variable.h"
 
 
 typedef enum {
@@ -17,7 +18,9 @@ typedef enum {
 	AST_UINT32,
 	AST_FUNCTION_DEF,
 	AST_FUNCTION_CALL,
+	AST_VARIABLE,
 	AST_VARIABLE_DEF,
+	AST_VARIABLE_REDEF,
 	AST_NOP
 } ast_type;
 
@@ -44,6 +47,14 @@ typedef struct ast_t {
 	/* AST_VARIABLE_DEF */
 	const char *variable_def_name;
 	struct ast_t *variable_def_value;
+	data_type_t variable_def_type;
+
+	/* AST_VARIABLE_REDEF */
+	const char *variable_redef_name;
+	struct ast_t *variable_redef_value;
+
+	/* AST_VARIABLE */
+	const char *variable_name;
 
 	/* AST_COMPOUND */
 	struct ast_t **compound_value;

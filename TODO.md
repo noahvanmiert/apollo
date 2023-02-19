@@ -1,5 +1,6 @@
 - [x] Function definitions
 - [x] Variable definitions
+- [ ] Change value of variable
 - [ ] Conditional statements (if/else statements)
 - [ ] Loops (for/while loops)
 - [ ] Arithmetic operations (addition, subtraction, multiplication, division)

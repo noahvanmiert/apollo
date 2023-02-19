@@ -39,6 +39,14 @@ ast_t *ast_new(ast_type type)
 	/* AST_VARIABLE_DEF */
 	ast->variable_def_name = NULL;
 	ast->variable_def_value = NULL;
+	ast->variable_def_type = TYPE_UNKOWN;
+
+	/* AST_VARIABLE */
+	ast->variable_name = NULL;
+
+	/* AST_VARIABLE_REDEF */
+	ast->variable_redef_name = NULL;
+	ast->variable_def_value = NULL;
 
 	/* AST_COMPOUND */
 	ast->compound_value = NULL;

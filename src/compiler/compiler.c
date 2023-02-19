@@ -103,6 +103,7 @@ void compile_statement(ast_t *node)
         case AST_FUNCTION_DEF:  compiler_compile_fn_def(node);   break;
         case AST_FUNCTION_CALL: compiler_compile_fn_call(node);  break;
         case AST_VARIABLE_DEF:  compiler_compile_var_def(node);  break;
+        case AST_VARIABLE_REDEF: compiler_compile_var_redef(node); break;
         case AST_NOP:           return;
 
         default: assert(0);
@@ -187,4 +188,23 @@ void compiler_compile_var_def(ast_t *node)
 
         default: assert(0 && "unkown platform");
     }
+}
+
+
+void compiler_compile_var_redef(ast_t *node)
+{
+    /* call the function associated with the platform */
+    switch (flag_info.target) {
+        case PLATFORM_MAC_ARM64: {
+            arm64_compile_var_redef(node);
+            break;
+        }
+
+        case PLATFORM_LINUX_X64: {
+            x64_compile_var_redef(node);
+            break;
+        }
+
+        default: assert(0 && "unkown platform");
+    } 
 }
